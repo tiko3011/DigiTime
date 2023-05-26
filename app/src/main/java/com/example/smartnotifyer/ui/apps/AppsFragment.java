@@ -2,15 +2,19 @@ package com.example.smartnotifyer.ui.apps;
 
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,11 +45,26 @@ public class AppsFragment extends Fragment {
         recyclerView.setAdapter(appAdapter);
 
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
+        appsViewModel.deleteAllApps();
 
         appsViewModel.getApps().observe(getViewLifecycleOwner(), apps -> {
             appAdapter.setAppList(apps);
         });
 
+        appsViewModel.addInstalledApps();
+
+        Button btnNext = root.findViewById(R.id.btn_next);
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.fragment_apps_list, new StatsFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+        
         return root;
     }
 
@@ -53,7 +72,7 @@ public class AppsFragment extends Fragment {
         List<App> appsList;
 
         public void setAppList(List<App> appsList) {
-            this.appsList = new ArrayList<>(this.appsList);
+            this.appsList = new ArrayList<>(appsList);
             notifyDataSetChanged();
         }
         public void setFilteredList(List<App> filteredList){

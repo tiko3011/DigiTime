@@ -5,8 +5,10 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.example.smartnotifyer.ui.UsageConverter;
+
 @Entity(tableName = "Stats")
-public class Stat {
+public class Stat implements Comparable<Stat>{
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "stat_id")
@@ -20,10 +22,14 @@ public class Stat {
     @ColumnInfo(name = "stat_time")
     public String statTime;
 
+    @ColumnInfo(name = "stat_time_long")
+    public long statTimeLong;
 
-    public Stat(@NonNull String statName, String statTime) {
+    public Stat(@NonNull String statName, @NonNull String statTime) {
         this.statName = statName;
         this.statTime = statTime;
+
+        this.statTimeLong = UsageConverter.convertStringToHour(this.statTime);
     }
 
     @NonNull
@@ -42,5 +48,10 @@ public class Stat {
 
     public void setStatTime(@NonNull String statTime) {
         this.statTime = statTime;
+    }
+
+    @Override
+    public int compareTo(Stat o) {
+        return Long.compare(o.statTimeLong, this.statTimeLong);
     }
 }

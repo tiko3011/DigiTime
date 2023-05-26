@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                         -splashScreenView.getHeight()
                 );
                 slideUp.setInterpolator(new AnticipateInterpolator());
-                slideUp.setDuration(600L);
+                slideUp.setDuration(500L);
 
                 slideUp.addListener(new AnimatorListenerAdapter() {
                     @Override

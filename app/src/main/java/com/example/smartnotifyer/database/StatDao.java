@@ -10,7 +10,7 @@ import java.util.List;
 
 @Dao
 public interface StatDao {
-    @Query("SELECT * FROM Stats")
+    @Query("SELECT * FROM Stats ORDER BY stat_time_long DESC")
     List<Stat> getAllStats();
 
     @Insert

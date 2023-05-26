@@ -92,7 +92,7 @@ public class StatsFragment extends Fragment {
         public void onBindViewHolder (@NonNull StatCardHolder holder, int position) {
             String name = statsList.get(position).statName;
             String time = statsList.get(position).statTime;
-            name = UsageConverter.changePackageName(name);
+
             time = UsageConverter.convertMinuteToString(Long.parseLong(time));
             holder.nameText.setText(name);
             holder.timeText.setText(time);

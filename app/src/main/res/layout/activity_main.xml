@@ -6,24 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:name="com.example.smartnotifyer.ui.stats.StatsFragment"
-        android:id="@+id/fragment_stats_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBaseline_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
 <!--    <androidx.fragment.app.FragmentContainerView-->
-<!--        android:name="com.example.smartnotifyer.ui.apps.AppsFragment"-->
-<!--        android:id="@+id/fragment_apps_list"-->
+<!--        android:name="com.example.smartnotifyer.ui.stats.StatsFragment"-->
+<!--        android:id="@+id/fragment_stats_list"-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="match_parent"-->
 <!--        app:layout_constraintBaseline_toBottomOf="parent"-->
 <!--        app:layout_constraintLeft_toLeftOf="parent"-->
 <!--        app:layout_constraintRight_toRightOf="parent"-->
 <!--        app:layout_constraintTop_toTopOf="parent"/>-->
+
+    <androidx.fragment.app.FragmentContainerView
+        android:name="com.example.smartnotifyer.ui.apps.AppsFragment"
+        android:id="@+id/fragment_apps_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBaseline_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

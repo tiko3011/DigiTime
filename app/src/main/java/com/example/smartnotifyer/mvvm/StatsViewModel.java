@@ -1,10 +1,16 @@
 package com.example.smartnotifyer.mvvm;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -36,6 +42,16 @@ public class StatsViewModel extends AndroidViewModel {
         return appDatabase.statDao().getAllStats();
     }
 
+    public void deleteDuplicates(){
+        AsyncTask.execute(() -> {
+            List<Stat> statList = appDatabase.statDao().getAllStats();
+
+
+
+            refreshStatList();
+        });
+    }
+
     public void addStat(@NonNull String statName, String statTime) {
         AsyncTask.execute(() -> {
             appDatabase.statDao().insertStat(new Stat(statName, statTime));
@@ -47,13 +63,20 @@ public class StatsViewModel extends AndroidViewModel {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getApplication().getSystemService(Context.USAGE_STATS_SERVICE);
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
 
+        PackageManager packageManager = getApplication().getPackageManager();
+
         for (int i = 0; i < usageStatsList.size(); i++) {
             UsageStats usageStats = usageStatsList.get(i);
 
             if (usageStats.getTotalTimeInForeground() / 60000 > 0 && usageStats.getLastTimeUsed() >= startTime) {
                 AsyncTask.execute(() -> {
-                    appDatabase.statDao().insertStat(new Stat(usageStats.getPackageName(), String.valueOf(usageStats.getTotalTimeInForeground() / 60000)));
-                    refreshStatList();
+                    try {
+                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(usageStats.getPackageName(), 0);
+                        appDatabase.statDao().insertStat(new Stat(packageManager.getApplicationLabel(applicationInfo).toString(), String.valueOf(usageStats.getTotalTimeInForeground() / 60000)));
+                        refreshStatList();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 });
             }
         }

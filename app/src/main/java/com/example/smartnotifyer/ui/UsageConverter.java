@@ -1,12 +1,6 @@
 package com.example.smartnotifyer.ui;
 
 public class UsageConverter {
-
-    public static String changePackageName(String str){
-        String output = str.replaceAll("(com|android|google|samsung|sec|org|app|\\.)", "");
-        output = output.substring(0, 1).toUpperCase() + output.substring(1);
-        return output;
-    }
     public static String convertMiliToString(long milliseconds){
         long minute = milliseconds / 60000;
 
