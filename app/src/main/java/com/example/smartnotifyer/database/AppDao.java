@@ -10,7 +10,7 @@ import java.util.List;
 
 @Dao
 public interface AppDao {
-    @Query("SELECT * FROM Apps")
+    @Query("SELECT * FROM Apps ORDER BY app_time DESC")
     List<App> getAllApps();
 
     @Insert

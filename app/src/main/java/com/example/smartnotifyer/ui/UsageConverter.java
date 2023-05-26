@@ -1,7 +1,7 @@
 package com.example.smartnotifyer.ui;
 
 public class UsageConverter {
-    public static String convertMiliToString(long milliseconds){
+    public static String convertMilliToString(long milliseconds){
         long minute = milliseconds / 60000;
 
         if (minute > 60){

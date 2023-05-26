@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private void splashAnimation(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             getSplashScreen().setOnExitAnimationListener(splashScreenView -> {
-                splashScreenView.setBackgroundColor(Color.BLACK);
                 final ObjectAnimator slideUp = ObjectAnimator.ofFloat(
                         splashScreenView,
                         View.TRANSLATION_Y,

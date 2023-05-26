@@ -13,7 +13,8 @@
     android:foreground="?android:attr/selectableItemBackground"
     card_view:cardCornerRadius="10dp"
     card_view:cardElevation="8dp"
-    card_view:contentPadding="8dp">
+    card_view:contentPadding="8dp"
+    android:backgroundTint="@color/aside_color">
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -22,7 +23,7 @@
 
 
         <CheckBox
-            android:id="@+id/checkBox"
+            android:id="@+id/item_checkbox_select_app"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -55,18 +56,22 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginBottom="0dp"
+                    android:fontFamily="@font/montserrat_bold"
                     android:paddingLeft="0dp"
                     android:text="Name"
                     android:textAppearance="@android:style/TextAppearance.Material.Body1"
+                    android:textColor="@color/black"
                     android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/item_app_info_tv"
+                    android:id="@+id/item_app_usage_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
 
-                    android:text="Text" />
+                    android:fontFamily="@font/montserrat"
+                    android:text="Text"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
 

@@ -1,16 +1,17 @@
 package com.example.smartnotifyer.ui.stats;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -48,7 +49,8 @@ public class StatsFragment extends Fragment {
             statAdapter.setStatsList(stats);
         });
 
-        statsViewModel.addStatSFromSystem(start, end);
+        statsViewModel.deleteAllStats();
+        statsViewModel.addStatsFromSystemDaily(start, end);
         TextView tv = root.findViewById(R.id.tv_interval);
         SeekBar bar = root.findViewById(R.id.bar_set_interval);
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -65,7 +67,7 @@ public class StatsFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 statsViewModel.deleteAllStats();
                 start = end - hour * bar.getProgress();
-                statsViewModel.addStatSFromSystem(start, end);
+                statsViewModel.addStatsFromSystemDaily(start, end);
             }
         });
         return root;
@@ -91,11 +93,20 @@ public class StatsFragment extends Fragment {
         @Override
         public void onBindViewHolder (@NonNull StatCardHolder holder, int position) {
             String name = statsList.get(position).statName;
-            String time = statsList.get(position).statTime;
+            long time = statsList.get(position).statTime;
 
-            time = UsageConverter.convertMinuteToString(Long.parseLong(time));
-            holder.nameText.setText(name);
-            holder.timeText.setText(time);
+            try {
+                PackageManager packageManager = requireActivity().getApplication().getPackageManager();
+                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(name, 0);
+                Drawable icon = packageManager.getApplicationIcon(applicationInfo);
+
+                holder.nameText.setText(packageManager.getApplicationLabel(applicationInfo).toString());
+                holder.icon.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+            holder.timeText.setText(UsageConverter.convertMilliToString(time));
         }
 
 
@@ -107,12 +118,13 @@ public class StatsFragment extends Fragment {
         public class StatCardHolder extends RecyclerView.ViewHolder {
             TextView nameText;
             TextView timeText;
+            ImageView icon;
 
             public StatCardHolder(View view) {
                 super(view);
                 nameText = view.findViewById(R.id.item_stat_name_tv);
                 timeText = view.findViewById(R.id.item_stat_time_tv);
-
+                icon = view.findViewById(R.id.item_stat_icon_iv);
             }
         }
     }

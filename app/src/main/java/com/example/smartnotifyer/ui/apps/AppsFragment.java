@@ -1,14 +1,20 @@
 package com.example.smartnotifyer.ui.apps;
 
 
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,9 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smartnotifyer.R;
 import com.example.smartnotifyer.database.App;
-import com.example.smartnotifyer.database.Stat;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
-import com.example.smartnotifyer.mvvm.StatsViewModel;
 import com.example.smartnotifyer.ui.UsageConverter;
 import com.example.smartnotifyer.ui.stats.StatsFragment;
 
@@ -45,12 +49,12 @@ public class AppsFragment extends Fragment {
         recyclerView.setAdapter(appAdapter);
 
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
-        appsViewModel.deleteAllApps();
 
         appsViewModel.getApps().observe(getViewLifecycleOwner(), apps -> {
             appAdapter.setAppList(apps);
         });
 
+        appsViewModel.deleteAllApps();
         appsViewModel.addInstalledApps();
 
         Button btnNext = root.findViewById(R.id.btn_next);
@@ -64,7 +68,7 @@ public class AppsFragment extends Fragment {
                 transaction.commit();
             }
         });
-        
+
         return root;
     }
 
@@ -87,10 +91,24 @@ public class AppsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder (@NonNull AppsFragment.AppAdapter.AppCardHolder holder, int position) {
-            String name = appsList.get(position).appName;
-            holder.nameText.setText(name);
-        }
+            String packageName = appsList.get(position).appName;
+            long usageWeekly = appsList.get(position).appUsageWeekly;
 
+            try {
+                PackageManager packageManager = requireActivity().getApplication().getPackageManager();
+                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+
+                Drawable icon = packageManager.getApplicationIcon(applicationInfo);
+                String name = packageManager.getApplicationLabel(applicationInfo).toString();
+                String appUsage = UsageConverter.convertMilliToString(usageWeekly);
+
+                holder.icon.setImageDrawable(icon);
+                holder.nameText.setText(name);
+                holder.timeText.setText(appUsage);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         @Override
         public int getItemCount() {
@@ -99,11 +117,16 @@ public class AppsFragment extends Fragment {
 
         public class AppCardHolder extends RecyclerView.ViewHolder {
             TextView nameText;
+            TextView timeText;
+            ImageView icon;
+            CheckBox checkBox;
 
             public AppCardHolder(View view) {
                 super(view);
                 nameText = view.findViewById(R.id.item_app_name_tv);
-
+                timeText = view.findViewById(R.id.item_app_usage_tv);
+                icon = view.findViewById(R.id.item_app_icon_iv);
+                checkBox = view.findViewById(R.id.item_checkbox_select_app);
             }
         }
     }

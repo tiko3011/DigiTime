@@ -1,16 +1,10 @@
 package com.example.smartnotifyer.mvvm;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -52,31 +46,40 @@ public class StatsViewModel extends AndroidViewModel {
         });
     }
 
-    public void addStat(@NonNull String statName, String statTime) {
+    public void addStat(@NonNull String statName, long statTime) {
         AsyncTask.execute(() -> {
             appDatabase.statDao().insertStat(new Stat(statName, statTime));
             refreshStatList();
         });
     }
 
-    public void addStatSFromSystem(long startTime, long endTime) {
+    public void addStatsFromSystemDaily(long startTime, long endTime) {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getApplication().getSystemService(Context.USAGE_STATS_SERVICE);
         List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
-
-        PackageManager packageManager = getApplication().getPackageManager();
 
         for (int i = 0; i < usageStatsList.size(); i++) {
             UsageStats usageStats = usageStatsList.get(i);
 
             if (usageStats.getTotalTimeInForeground() / 60000 > 0 && usageStats.getLastTimeUsed() >= startTime) {
                 AsyncTask.execute(() -> {
-                    try {
-                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(usageStats.getPackageName(), 0);
-                        appDatabase.statDao().insertStat(new Stat(packageManager.getApplicationLabel(applicationInfo).toString(), String.valueOf(usageStats.getTotalTimeInForeground() / 60000)));
+                        appDatabase.statDao().insertStat(new Stat(usageStats.getPackageName(), usageStats.getTotalTimeInForeground()));
                         refreshStatList();
-                    } catch (PackageManager.NameNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
+                });
+            }
+        }
+    }
+
+    public void addStatsFromSystemWeekly(long startTime, long endTime) {
+        UsageStatsManager usageStatsManager = (UsageStatsManager) getApplication().getSystemService(Context.USAGE_STATS_SERVICE);
+        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_WEEKLY, startTime, endTime);
+
+        for (int i = 0; i < usageStatsList.size(); i++) {
+            UsageStats usageStats = usageStatsList.get(i);
+
+            if (usageStats.getTotalTimeInForeground() / 60000 > 0) {
+                AsyncTask.execute(() -> {
+                    appDatabase.statDao().insertStat(new Stat(usageStats.getPackageName(), usageStats.getTotalTimeInForeground()));
+                    refreshStatList();
                 });
             }
         }
