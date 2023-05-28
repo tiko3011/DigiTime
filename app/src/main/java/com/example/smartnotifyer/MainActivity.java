@@ -3,6 +3,7 @@ package com.example.smartnotifyer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.smartnotifyer.alarm.AlarmHelper;
 import com.example.smartnotifyer.databinding.ActivityMainBinding;
+import com.example.smartnotifyer.ui.limits.LimitActivity;
 
 public class MainActivity extends AppCompatActivity {
 

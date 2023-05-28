@@ -1,6 +1,9 @@
 package com.example.smartnotifyer.ui;
 
+import java.text.DecimalFormat;
+
 public class UsageConverter {
+    public static DecimalFormat decimalFormat = new DecimalFormat("#.##");
     public static String convertMilliToString(long milliseconds){
         long minute = milliseconds / 60000;
 
