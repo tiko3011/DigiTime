@@ -51,6 +51,7 @@ public class StatsFragment extends Fragment {
 
         statsViewModel.deleteAllStats();
         statsViewModel.addStatsFromSystemDaily(start, end);
+        statsViewModel.deleteDuplicates();
         TextView tv = root.findViewById(R.id.tv_interval);
         SeekBar bar = root.findViewById(R.id.bar_set_interval);
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -68,6 +69,7 @@ public class StatsFragment extends Fragment {
                 statsViewModel.deleteAllStats();
                 start = end - hour * bar.getProgress();
                 statsViewModel.addStatsFromSystemDaily(start, end);
+                statsViewModel.deleteDuplicates();
             }
         });
         return root;

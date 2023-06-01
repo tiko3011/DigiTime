@@ -17,6 +17,8 @@ import com.example.smartnotifyer.database.Stat;
 
 import java.util.List;
 
+import javax.xml.namespace.QName;
+
 public class StatsViewModel extends AndroidViewModel {
     private AppDatabase appDatabase;
     private MutableLiveData<List<Stat>> stats;
@@ -40,7 +42,21 @@ public class StatsViewModel extends AndroidViewModel {
         AsyncTask.execute(() -> {
             List<Stat> statList = appDatabase.statDao().getAllStats();
 
+            for (int i = 0; i < statList.size(); i++) {
+                String nameI = statList.get(i).getStatName();
+                long timeI = statList.get(i).getStatTime();
 
+                for (int j = 0; j < i; j++) {
+                    String nameJ = statList.get(j).getStatName();
+                    long timeJ = statList.get(j).getStatTime();
+
+                    if (nameI.equals(nameJ)){
+                        appDatabase.statDao().getItemByName(nameJ).setStatTime(timeI + timeJ);
+                        appDatabase.statDao().delete(statList.get(i));
+                        break;
+                    }
+                }
+            }
 
             refreshStatList();
         });

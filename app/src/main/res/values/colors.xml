@@ -16,4 +16,7 @@
     <color name="red">#FF0000</color>
     <color name="blue">#1636E4</color>
     <color name="pink">#FF00E5</color>
+
+    <color name="error">#DC4545</color>
+    <color name="success">#45DC6B</color>
 </resources>

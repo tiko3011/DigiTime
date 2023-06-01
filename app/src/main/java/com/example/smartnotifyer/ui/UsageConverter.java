@@ -1,5 +1,13 @@
 package com.example.smartnotifyer.ui;
 
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.provider.Settings;
+
+import androidx.appcompat.app.AlertDialog;
+
 import java.text.DecimalFormat;
 
 public class UsageConverter {

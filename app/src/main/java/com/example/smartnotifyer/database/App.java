@@ -1,18 +1,15 @@
 package com.example.smartnotifyer.database;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.example.smartnotifyer.ui.UsageConverter;
-
 @Entity(tableName = "Apps")
 public class App implements Comparable<App>{
 
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "app_id")
-    public int appId;
-
+    @NonNull
+    @PrimaryKey
     @ColumnInfo(name = "app_name")
     public String appName;
 
@@ -22,24 +19,17 @@ public class App implements Comparable<App>{
     @ColumnInfo(name = "app_checked")
     public boolean isChecked;
 
-    public App(String appName, long appUsageWeekly) {
+    public App(@NonNull String appName, long appUsageWeekly) {
         this.appName = appName;
         this.appUsageWeekly = appUsageWeekly;
     }
 
-    public int getAppId() {
-        return appId;
-    }
-
-    public void setAppId(int appId) {
-        this.appId = appId;
-    }
-
+    @NonNull
     public String getAppName() {
         return appName;
     }
 
-    public void setAppName(String appName) {
+    public void setAppName(@NonNull String appName) {
         this.appName = appName;
     }
 
@@ -61,12 +51,7 @@ public class App implements Comparable<App>{
 
     @Override
     public String toString() {
-        return "App{" +
-                "appId=" + appId +
-                ", appName='" + appName + '\'' +
-                ", appUsageWeekly=" + appUsageWeekly +
-                ", isChecked=" + isChecked +
-                '}';
+        return "App Name: --> " + appName + "\nSelected: --> " + isChecked + "\n\n\n";
     }
 
     @Override

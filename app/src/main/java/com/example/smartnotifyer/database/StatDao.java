@@ -13,6 +13,8 @@ public interface StatDao {
     @Query("SELECT * FROM Stats ORDER BY stat_time DESC")
     List<Stat> getAllStats();
 
+    @Query("SELECT * FROM Stats WHERE stat_name = :name")
+    Stat getItemByName(String name);
     @Insert
     void insertStat(Stat stat);
 
