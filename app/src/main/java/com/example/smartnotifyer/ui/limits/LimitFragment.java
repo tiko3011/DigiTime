@@ -1,5 +1,10 @@
 package com.example.smartnotifyer.ui.limits;
 
+import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -27,33 +32,21 @@ import java.util.List;
 public class LimitFragment extends Fragment {
     static int weeklyUsage = AppsFragment.weeklyUsage;
     public static long usageLimit;
+    AppsViewModel appsViewModel;
 
-    private AppsViewModel appsViewModel;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root =  inflater.inflate(R.layout.fragment_limit, container, false);
 
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
+
         TextView tvUsage = root.findViewById(R.id.tv_usage_time);     tvUsage.setText(UsageConverter.convertMinuteToString(AppsFragment.weeklyUsage));
         TextView tvTarget = root.findViewById(R.id.tv_limit); tvTarget.setText(tvUsage.getText());
         TextView tvComment = root.findViewById(R.id.tv_info_reduction);
-
-        Button btnNext = root.findViewById(R.id.btn_confirm);
-        btnNext.setOnClickListener(v -> {
-            StatsFragment fragment = new StatsFragment();
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_permission, fragment); // R.id.container is the ID of the container in your activity's layout
-            transaction.addToBackStack(null); // Optional: Add the transaction to the back stack
-            transaction.commit();
-        });
-        Button btnBack = root.findViewById(R.id.btn_back);
-        btnBack.setOnClickListener(v -> {
-            AppsFragment fragment = new AppsFragment();
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_permission, fragment); // R.id.container is the ID of the container in your activity's layout
-            transaction.addToBackStack(null); // Optional: Add the transaction to the back stack
-            transaction.commit();
-        });
 
         SeekBar barSetLimit = root.findViewById(R.id.bar_set_limit);
         barSetLimit.setMax(weeklyUsage * 2);
@@ -83,13 +76,26 @@ public class LimitFragment extends Fragment {
             }
         });
 
-        appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
-        AsyncTask.execute(() -> {
-            List<App> apps = appsViewModel.getAllApps();
+        Button btnNext = root.findViewById(R.id.btn_confirm);
+        btnNext.setOnClickListener(v -> {
+            StatsFragment fragment = new StatsFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_permission, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
 
-            for (int i = 0; i < apps.size(); i++) {
-                Log.i("TAGGGSSGASAS", apps.get(i).toString());
-            }
+        Button btnBack = root.findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> {
+            appsViewModel.deleteAllApps();
+            editor.putBoolean("isNextClicked", false);
+            editor.apply();
+
+            AppsFragment fragment = new AppsFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_permission, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         });
 
         return root;

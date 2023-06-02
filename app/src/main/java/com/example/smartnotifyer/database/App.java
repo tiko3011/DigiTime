@@ -51,7 +51,7 @@ public class App implements Comparable<App>{
 
     @Override
     public String toString() {
-        return "App Name: --> " + appName + "\nSelected: --> " + isChecked + "\n\n\n";
+        return "App Name: --> " + appName;
     }
 
     @Override

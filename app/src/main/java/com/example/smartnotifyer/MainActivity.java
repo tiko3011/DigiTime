@@ -3,28 +3,31 @@ package com.example.smartnotifyer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.app.AppOpsManager;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnticipateInterpolator;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.smartnotifyer.alarm.AlarmHelper;
+import com.example.smartnotifyer.alarm.AlarmReceiver;
+import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.databinding.ActivityMainBinding;
-import com.example.smartnotifyer.ui.UsageAccessPermissionChecker;
+import com.example.smartnotifyer.mvvm.AppsViewModel;
+import com.example.smartnotifyer.ui.UsagePermission;
+import com.example.smartnotifyer.ui.apps.AppsFragment;
 import com.example.smartnotifyer.ui.permission.PermissionFragment;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
-    private AlarmHelper alarmHelper;;
+    private AlarmHelper alarmHelper;
     private ActivityMainBinding binding;
+    AppsViewModel appsViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,18 +38,29 @@ public class MainActivity extends AppCompatActivity {
         splashAnimation();
         checkPermission();
 
+        appsViewModel = new ViewModelProvider(this).get(AppsViewModel.class);
         alarmHelper = new AlarmHelper();
-        alarmHelper.setAlarmInNextMinute(this);
+        alarmHelper.setAlarmInNextMinute(getApplicationContext());
+
+//        AsyncTask.execute(() -> {
+//            List<App> apps = appsViewModel.getAllApps();
+//
+//            AlarmReceiver.selectedApps.clear();
+//            AlarmReceiver.selectedApps.addAll(apps);
+//        });
     }
 
+    @Override
+    public void onBackPressed() {
+        // Doing Nothing
+    }
     @Override
     protected void onResume() {
         super.onResume();
         checkPermission();
     }
-
     public void checkPermission(){
-        PermissionFragment.isUsageGranted = UsageAccessPermissionChecker.isUsageAccessGranted(getApplicationContext());
+        PermissionFragment.isUsageGranted = UsagePermission.isUsageAccessGranted(getApplicationContext());
     }
     private void splashAnimation(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

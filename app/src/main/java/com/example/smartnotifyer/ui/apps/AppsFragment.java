@@ -6,6 +6,7 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -22,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -39,18 +41,21 @@ import java.util.Collections;
 import java.util.List;
 
 public class AppsFragment extends Fragment {
-
     public static int weeklyUsage = 0, count = 0;
-    public static boolean isSelected = false;
+    public boolean isSelected = false;
     public List<App> appList = new ArrayList<>();
 
     private AppsFragment.AppAdapter appAdapter;
     private AppsViewModel appsViewModel;
     
     TextView tvWeeklyUsage;
+    Button btnNext;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_apps, container, false);
+
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
 
         RecyclerView recyclerView = root.findViewById(R.id.app_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -58,7 +63,6 @@ public class AppsFragment extends Fragment {
         recyclerView.setAdapter(appAdapter);
 
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
-        appsViewModel.deleteAllApps();
 
         PackageManager packageManager = requireActivity().getApplication().getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -73,7 +77,7 @@ public class AppsFragment extends Fragment {
         for (int i = 0; i < resolveInfos.size(); i++) {
             ResolveInfo resolveInfo = resolveInfos.get(i);
             String appName = resolveInfo.activityInfo.packageName;;
-            long usageWeekly = 100000000L;
+            long usageWeekly = 0L;
 
             for (int j = 0; j < usageStatsList.size(); j++) {
                 UsageStats usageStats = usageStatsList.get(j);
@@ -93,19 +97,21 @@ public class AppsFragment extends Fragment {
         appAdapter.setAppList(appList);
 
         tvWeeklyUsage = root.findViewById(R.id.tv_weekly_usage);
-        Button btnNext = root.findViewById(R.id.btn_next);
+        btnNext = root.findViewById(R.id.btn_next);
 
-        btnNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isSelected = true;
+        if (tvWeeklyUsage.getText().toString().equals("Please select apps to continue")){
+            btnNext.setEnabled(false);
+        }
 
-                LimitFragment fragment = new LimitFragment();
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_permission, fragment); // R.id.container is the ID of the container in your activity's layout
-                transaction.addToBackStack(null); // Optional: Add the transaction to the back stack
-                transaction.commit();
-            }
+        btnNext.setOnClickListener(v -> {
+            editor.putBoolean("isNextClicked", true);
+            editor.apply();
+
+            LimitFragment fragment = new LimitFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_permission, fragment); // R.id.container is the ID of the container in your activity's layout
+            transaction.addToBackStack(null); // Optional: Add the transaction to the back stack
+            transaction.commit();
         });
 
         return root;
@@ -207,7 +213,7 @@ public class AppsFragment extends Fragment {
                         List<App> apps = appsViewModel.getAllApps();
 
                         for (int i = 0; i < apps.size(); i++) {
-                            Log.i("TAGGGSSGASAS", apps.get(i).toString());
+                            Log.i("TAGSSSS", apps.get(i).toString());
                         }
                     });
 
@@ -223,6 +229,12 @@ public class AppsFragment extends Fragment {
             tvWeeklyUsage.setText("You used these apps " + strWeeklyUsage);
         } else {
             tvWeeklyUsage.setText("Please select apps to continue");
+        }
+
+        if (tvWeeklyUsage.getText().toString().equals("Please select apps to continue")){
+            btnNext.setEnabled(false);
+        } else {
+            btnNext.setEnabled(true);
         }
     }
 }

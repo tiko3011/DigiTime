@@ -15,13 +15,13 @@ public class AlarmHelper {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(context, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        alarmIntent = PendingIntent.getBroadcast(context, 200, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.cancel(alarmIntent);
 
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
             //Setting alarm in 5 seconds
-            long msToOff = System.currentTimeMillis() + 1000;
+            long msToOff = System.currentTimeMillis() + 1000 * 5;
             alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOff, null), alarmIntent);;
         }
     }

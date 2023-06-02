@@ -30,7 +30,7 @@
         android:layout_marginBottom="10dp"
         android:paddingTop="4dp"
         android:requiresFadingEdge="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/boxWeekUsage"
+        app:layout_constraintBottom_toTopOf="@+id/box_weekly_usage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/info_tv_select"
@@ -38,7 +38,7 @@
 
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/boxWeekUsage"
+        android:id="@+id/box_weekly_usage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"

@@ -1,12 +1,9 @@
 package com.example.smartnotifyer.ui;
 
-import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Build;
 
-public class UsageAccessPermissionChecker {
+public class UsagePermission {
     private static final String USAGE_ACCESS_PERMISSION = "android.permission.PACKAGE_USAGE_STATS";
 
     public static boolean isUsageAccessGranted(Context context) {
