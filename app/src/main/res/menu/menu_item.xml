@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/Apps"
+        android:icon="@drawable/ic_input_add"
+        android:title="Add apps to track"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/Limit"
+        android:icon="@drawable/ic_menu_recent_history"
+        android:title="Set usage limit"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/Access"
+        android:icon="@drawable/ic_notification_clear_all"
+        android:title="Disable Usage Access"
+        app:showAsAction="never" />
+
+</menu>

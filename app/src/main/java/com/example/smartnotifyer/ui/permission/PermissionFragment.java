@@ -47,7 +47,7 @@ public class PermissionFragment extends Fragment {
             if (isButtonClicked){
                 StatsFragment fragment = new StatsFragment();
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_permission, fragment);
+                transaction.replace(R.id.fragment_main, fragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
 
@@ -62,7 +62,7 @@ public class PermissionFragment extends Fragment {
             } else {
                 AppsFragment fragment = new AppsFragment();
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_permission, fragment);
+                transaction.replace(R.id.fragment_main, fragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
@@ -78,13 +78,13 @@ public class PermissionFragment extends Fragment {
                 if (isButtonClicked){
                     StatsFragment fragment = new StatsFragment();
                     FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fragment_permission, fragment);
+                    transaction.replace(R.id.fragment_main, fragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
                 } else {
                     AppsFragment fragment = new AppsFragment();
                     FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fragment_permission, fragment);
+                    transaction.replace(R.id.fragment_main, fragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
                 }

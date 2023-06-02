@@ -5,15 +5,24 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,11 +31,15 @@ import com.example.smartnotifyer.R;
 import com.example.smartnotifyer.database.Stat;
 import com.example.smartnotifyer.mvvm.StatsViewModel;
 import com.example.smartnotifyer.ui.UsageConverter;
+import com.example.smartnotifyer.ui.apps.AppsFragment;
+import com.example.smartnotifyer.ui.limits.LimitFragment;
+import com.example.smartnotifyer.ui.permission.PermissionFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StatsFragment extends Fragment {
+    Toolbar toolbar;
 
     private final long hour = 60 * 60 * 1000;
     private long end = System.currentTimeMillis();
@@ -38,6 +51,12 @@ public class StatsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_stats, container, false);
+
+        toolbar = root.findViewById(R.id.toolbar);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        assert activity != null;
+        activity.setSupportActionBar(toolbar);
+        activity.setTitle("");
 
         RecyclerView recyclerView = root.findViewById(R.id.stat_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -73,6 +92,45 @@ public class StatsFragment extends Fragment {
             }
         });
         return root;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_item, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.Apps){
+            AppsFragment fragment = new AppsFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_main, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else if (id == R.id.Limit) {
+            LimitFragment fragment = new LimitFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_main, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else if (id == R.id.Access) {
+            PermissionFragment fragment = new PermissionFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_main, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private class StatAdapter extends RecyclerView.Adapter<StatAdapter.StatCardHolder> {

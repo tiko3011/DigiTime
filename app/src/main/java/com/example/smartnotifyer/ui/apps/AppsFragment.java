@@ -1,6 +1,5 @@
 package com.example.smartnotifyer.ui.apps;
 
-
 import android.annotation.SuppressLint;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -10,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +30,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smartnotifyer.R;
+import com.example.smartnotifyer.alarm.AlarmReceiver;
 import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
 import com.example.smartnotifyer.ui.UsageConverter;
@@ -42,7 +42,6 @@ import java.util.List;
 
 public class AppsFragment extends Fragment {
     public static int weeklyUsage = 0, count = 0;
-    public boolean isSelected = false;
     public List<App> appList = new ArrayList<>();
 
     private AppsFragment.AppAdapter appAdapter;
@@ -63,6 +62,9 @@ public class AppsFragment extends Fragment {
         recyclerView.setAdapter(appAdapter);
 
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
+        appsViewModel.deleteAllApps();
+
+        AlarmReceiver.selectedApps.clear();
 
         PackageManager packageManager = requireActivity().getApplication().getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -88,7 +90,6 @@ public class AppsFragment extends Fragment {
                 }
             }
             long appUsage = usageWeekly / 7;
-
             appList.add(new App(appName, appUsage));
         }
 
@@ -105,11 +106,12 @@ public class AppsFragment extends Fragment {
 
         btnNext.setOnClickListener(v -> {
             editor.putBoolean("isNextClicked", true);
+            editor.putInt("averageWeeklyUsage", weeklyUsage);
             editor.apply();
 
             LimitFragment fragment = new LimitFragment();
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_permission, fragment); // R.id.container is the ID of the container in your activity's layout
+            transaction.replace(R.id.fragment_main, fragment); // R.id.container is the ID of the container in your activity's layout
             transaction.addToBackStack(null); // Optional: Add the transaction to the back stack
             transaction.commit();
         });
@@ -192,7 +194,7 @@ public class AppsFragment extends Fragment {
                     }
                     appsList.get(adapterPosition).setChecked(checkBox.isChecked());
                     
-                    setWeeklyUsage(appsList);
+                    setWeeklyUsage();
                 });
 
                 checkBox.setOnClickListener(v -> {
@@ -209,21 +211,13 @@ public class AppsFragment extends Fragment {
                         appsViewModel.deleteApp(appsList.get(adapterPosition));
                     }
 
-                    AsyncTask.execute(() -> {
-                        List<App> apps = appsViewModel.getAllApps();
-
-                        for (int i = 0; i < apps.size(); i++) {
-                            Log.i("TAGSSSS", apps.get(i).toString());
-                        }
-                    });
-
-                    setWeeklyUsage(appsList);
+                    setWeeklyUsage();
                 });
             }
         }
     }
 
-    public void setWeeklyUsage(List<App> apps){
+    public void setWeeklyUsage(){
         if (count > 0){
             String strWeeklyUsage = UsageConverter.convertMinuteToString(weeklyUsage);
             tvWeeklyUsage.setText("You used these apps " + strWeeklyUsage);

@@ -10,7 +10,7 @@
 
     <color name="blue_black">#FF121B30</color>
     <color name="main_color">#F6F6F6</color>
-    <color name="aside_color">#EAEAEA</color>
+    <color name="aside_color">#DCEAEAEA</color>
     <color name="green">#17F320</color>
     <color name="yellow">#FFEC47</color>
     <color name="red">#FF0000</color>
@@ -19,4 +19,7 @@
 
     <color name="error">#DC4545</color>
     <color name="success">#45DC6B</color>
+
+    <color name="aside_color_dark">#133453</color>
+    <color name="main_color_dark">#0E273D</color>
 </resources>

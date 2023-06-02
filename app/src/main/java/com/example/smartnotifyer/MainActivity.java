@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.animation.AnticipateInterpolator;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.smartnotifyer.alarm.AlarmHelper;
@@ -32,27 +34,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        splashAnimation();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        splashAnimation();
         checkPermission();
 
         appsViewModel = new ViewModelProvider(this).get(AppsViewModel.class);
         alarmHelper = new AlarmHelper();
         alarmHelper.setAlarmInNextMinute(getApplicationContext());
 
-//        AsyncTask.execute(() -> {
-//            List<App> apps = appsViewModel.getAllApps();
-//
-//            AlarmReceiver.selectedApps.clear();
-//            AlarmReceiver.selectedApps.addAll(apps);
-//        });
+        AsyncTask.execute(() -> {
+            List<App> apps = appsViewModel.getAllApps();
+
+            AlarmReceiver.selectedApps.clear();
+            AlarmReceiver.selectedApps.addAll(apps);
+        });
     }
 
     @Override
     public void onBackPressed() {
-        // Doing Nothing
+        super.onBackPressed();
     }
     @Override
     protected void onResume() {

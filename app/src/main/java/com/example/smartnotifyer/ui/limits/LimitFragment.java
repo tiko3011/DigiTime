@@ -1,8 +1,6 @@
 package com.example.smartnotifyer.ui.limits;
 
 import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -12,7 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +18,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.smartnotifyer.R;
+import com.example.smartnotifyer.alarm.AlarmReceiver;
 import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
 import com.example.smartnotifyer.ui.UsageConverter;
@@ -30,7 +28,7 @@ import com.example.smartnotifyer.ui.stats.StatsFragment;
 import java.util.List;
 
 public class LimitFragment extends Fragment {
-    static int weeklyUsage = AppsFragment.weeklyUsage;
+    static int weeklyUsage;
     public static long usageLimit;
     AppsViewModel appsViewModel;
 
@@ -40,17 +38,26 @@ public class LimitFragment extends Fragment {
         View root =  inflater.inflate(R.layout.fragment_limit, container, false);
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        weeklyUsage = sharedPreferences.getInt("averageWeeklyUsage", AppsFragment.weeklyUsage);
+
         @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
 
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
 
-        TextView tvUsage = root.findViewById(R.id.tv_usage_time);     tvUsage.setText(UsageConverter.convertMinuteToString(AppsFragment.weeklyUsage));
+        TextView tvUsage = root.findViewById(R.id.tv_usage_time);     tvUsage.setText(UsageConverter.convertMinuteToString(weeklyUsage));
         TextView tvTarget = root.findViewById(R.id.tv_limit); tvTarget.setText(tvUsage.getText());
         TextView tvComment = root.findViewById(R.id.tv_info_reduction);
 
         SeekBar barSetLimit = root.findViewById(R.id.bar_set_limit);
-        barSetLimit.setMax(weeklyUsage * 2);
-        barSetLimit.setProgress(weeklyUsage);
+
+        if (weeklyUsage == 0){
+            barSetLimit.setMax(300);
+            barSetLimit.setProgress(150);
+        } else {
+            barSetLimit.setMax(weeklyUsage * 2);
+            barSetLimit.setProgress(weeklyUsage);
+        }
+
         barSetLimit.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -78,22 +85,31 @@ public class LimitFragment extends Fragment {
 
         Button btnNext = root.findViewById(R.id.btn_confirm);
         btnNext.setOnClickListener(v -> {
+            editor.putLong("usageLimit", usageLimit);
+            editor.apply();
+
+            AsyncTask.execute(() -> {
+                List<App> apps = appsViewModel.getAllApps();
+
+                AlarmReceiver.selectedApps.clear();
+                AlarmReceiver.selectedApps.addAll(apps);
+            });
+
             StatsFragment fragment = new StatsFragment();
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_permission, fragment);
+            transaction.replace(R.id.fragment_main, fragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
 
         Button btnBack = root.findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> {
-            appsViewModel.deleteAllApps();
             editor.putBoolean("isNextClicked", false);
             editor.apply();
 
             AppsFragment fragment = new AppsFragment();
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_permission, fragment);
+            transaction.replace(R.id.fragment_main, fragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });
