@@ -6,16 +6,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +17,17 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import android.os.Handler;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.smartnotifyer.R;
 import com.example.smartnotifyer.database.App;
@@ -41,17 +42,14 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatsFragment extends Fragment {
+public class SelectedStatsFragment extends Fragment {
     Toolbar toolbar;
 
     private final long hour = 60 * 60 * 1000;
     private long end = System.currentTimeMillis();
     private long start = end - hour;
 
-    private List<SelectedApp> selectedApps = new ArrayList<>();
-
-    private StatAdapter statAdapter;
-    private SelectedAppAdapter statAdapterSelected;
+    private SelectedStatAdapter statAdapterSelected;
     private StatsViewModel statsViewModel;
     private AppsViewModel appsViewModel;
 
@@ -65,33 +63,35 @@ public class StatsFragment extends Fragment {
         activity.setSupportActionBar(toolbar);
         activity.setTitle("");
 
+        RecyclerView recyclerViewSelected = root.findViewById(R.id.selected_stat_list);
+        recyclerViewSelected.setLayoutManager(new LinearLayoutManager(requireContext()));
+        statAdapterSelected = new SelectedStatAdapter();
+        recyclerViewSelected.setAdapter(statAdapterSelected);
+
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
         statsViewModel = new ViewModelProvider(requireActivity()).get(StatsViewModel.class);
 
-        RecyclerView recyclerView = root.findViewById(R.id.stat_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        statAdapter = new StatAdapter();
-        recyclerView.setAdapter(statAdapter);
-
         statsViewModel.getStats().observe(getViewLifecycleOwner(), stats -> {
-            statAdapter.setStatsList(stats);
+            statAdapterSelected.setStatsList(stats);
         });
 
+        statsViewModel.getStats().observe(getViewLifecycleOwner(), stats -> {
+            List<Stat> selectedStats = new ArrayList<>();
 
-        RecyclerView recyclerViewSelected = root.findViewById(R.id.selected_stat_list);
-        recyclerViewSelected.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        statAdapterSelected = new SelectedAppAdapter();
-        recyclerViewSelected.setAdapter(statAdapterSelected);
+            AsyncTask.execute(() -> {
+                List<App> apps = appsViewModel.getAllApps();
 
-        AsyncTask.execute(() -> {
-            List<App> apps = appsViewModel.getAllApps();
-            Log.i("KA TAGSS BIIH", "Apps: --> " + apps.size());
+                for (int i = 0; i < stats.size(); i++) {
+                    for (int j = 0; j < apps.size(); j++) {
+                        if (stats.get(i).statName.equals(apps.get(j).appName)){
+                            selectedStats.add(stats.get(i));
+                            Log.i("TAGSSS KA MEKA", apps.get(j).toString());
+                        }
+                    }
+                }
+            });
 
-            for (int i = 0; i < apps.size(); i++) {
-                selectedApps.add(new SelectedApp(apps.get(i).appName));
-            }
-            Log.i("KA TAGSS BIIH", "Selected: --> " + selectedApps.size());
-            statAdapterSelected.setSelectedApps(selectedApps);
+            statAdapterSelected.setStatsList(selectedStats);
         });
 
         statsViewModel.deleteAllStats();
@@ -140,7 +140,7 @@ public class StatsFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private class StatAdapter extends RecyclerView.Adapter<StatAdapter.StatCardHolder> {
+    private class SelectedStatAdapter extends RecyclerView.Adapter<SelectedStatAdapter.StatCardHolder> {
         List<Stat> statsList;
 
         public void setStatsList(List<Stat> statsList) {
@@ -192,56 +192,6 @@ public class StatsFragment extends Fragment {
                 nameText = view.findViewById(R.id.item_stat_name_tv);
                 timeText = view.findViewById(R.id.item_stat_time_tv);
                 icon = view.findViewById(R.id.item_stat_icon_iv);
-            }
-        }
-    }
-
-    private class SelectedAppAdapter extends RecyclerView.Adapter<SelectedAppAdapter.SelectedAppCardHolder> {
-        List<SelectedApp> selectedApps;
-
-        public void setSelectedApps(List<SelectedApp> selectedApps) {
-            this.selectedApps = new ArrayList<>(selectedApps);
-            notifyDataSetChanged();
-        }
-        public void setFilteredList(List<SelectedApp> filteredList){
-            this.selectedApps = filteredList;
-            notifyDataSetChanged();
-        }
-
-
-        @NonNull
-        @Override
-        public SelectedAppCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            Context context = parent.getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-            return new SelectedAppCardHolder(inflater.inflate(R.layout.view_icon_list_item, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull SelectedAppCardHolder holder, int position) {
-            String name = selectedApps.get(position).selectedAppName;
-
-            try {
-                PackageManager packageManager = requireActivity().getApplication().getPackageManager();
-                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(name, 0);
-                Drawable icon = packageManager.getApplicationIcon(applicationInfo);
-
-                holder.icon.setImageDrawable(icon);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return selectedApps != null ? selectedApps.size() : 0;
-        }
-
-        public class SelectedAppCardHolder extends RecyclerView.ViewHolder {
-            ImageView icon;
-            public SelectedAppCardHolder(View view) {
-                super(view);
-                icon = view.findViewById(R.id.item_icon);
             }
         }
     }

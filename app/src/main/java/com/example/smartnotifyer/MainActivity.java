@@ -6,13 +6,10 @@ import android.animation.ObjectAnimator;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AnticipateInterpolator;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.smartnotifyer.alarm.AlarmHelper;
@@ -20,8 +17,7 @@ import com.example.smartnotifyer.alarm.AlarmReceiver;
 import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.databinding.ActivityMainBinding;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
-import com.example.smartnotifyer.ui.UsagePermission;
-import com.example.smartnotifyer.ui.apps.AppsFragment;
+import com.example.smartnotifyer.ui.permission.UsagePermission;
 import com.example.smartnotifyer.ui.permission.PermissionFragment;
 
 import java.util.List;
@@ -54,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        // Disallowing Back Pressing
     }
     @Override
     protected void onResume() {

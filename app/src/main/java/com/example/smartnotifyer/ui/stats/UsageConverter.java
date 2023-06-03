@@ -1,4 +1,4 @@
-package com.example.smartnotifyer.ui;
+package com.example.smartnotifyer.ui.stats;
 
 import static androidx.core.app.ActivityCompat.startActivityForResult;
 

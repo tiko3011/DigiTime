@@ -42,6 +42,11 @@ public class Stat implements Comparable<Stat>{
     }
 
     @Override
+    public String toString() {
+        return "Stat name: --> " + statName;
+    }
+
+    @Override
     public int compareTo(Stat o) {
         return Long.compare(o.statTime, this.statTime);
     }

@@ -1,4 +1,4 @@
-package com.example.smartnotifyer.ui;
+package com.example.smartnotifyer.ui.permission;
 
 import android.app.AppOpsManager;
 import android.content.Context;

@@ -9,9 +9,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,7 +32,7 @@ import com.example.smartnotifyer.R;
 import com.example.smartnotifyer.alarm.AlarmReceiver;
 import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
-import com.example.smartnotifyer.ui.UsageConverter;
+import com.example.smartnotifyer.ui.stats.UsageConverter;
 import com.example.smartnotifyer.ui.limits.LimitFragment;
 
 import java.util.ArrayList;
@@ -171,6 +170,7 @@ public class AppsFragment extends Fragment {
             ImageView icon;
             CheckBox checkBox;
 
+            @SuppressLint("ResourceAsColor")
             public AppCardHolder(View view) {
                 super(view);
                 nameText = view.findViewById(R.id.item_app_name_tv);
@@ -178,17 +178,23 @@ public class AppsFragment extends Fragment {
                 icon = view.findViewById(R.id.item_app_icon_iv);
                 checkBox = view.findViewById(R.id.item_checkbox_select_app);
 
+
+                checkBox.setClickable(false);
+                checkBox.setFocusable(false);
+
                 view.setOnClickListener(v -> {
                     int adapterPosition = getAdapterPosition();
 
                     if (checkBox.isChecked()){
                         checkBox.setChecked(false);
+//                        view.getBackground().clearColorFilter();
                         count--;
                         weeklyUsage -= UsageConverter.convertStringToHour(timeText.getText().toString());
                         appsViewModel.deleteApp(appsList.get(adapterPosition));
                     } else {
                         count++;
                         checkBox.setChecked(true);
+//                        view.getBackground().setColorFilter(view.getResources().getColor(R.color.selectedTint), PorterDuff.Mode.SRC_ATOP);
                         weeklyUsage += UsageConverter.convertStringToHour(timeText.getText().toString());
                         appsViewModel.addApp(appsList.get(adapterPosition));
                     }
@@ -198,18 +204,8 @@ public class AppsFragment extends Fragment {
                 });
 
                 checkBox.setOnClickListener(v -> {
-                    int adapterPosition = getAdapterPosition();
-                    appsList.get(adapterPosition).setChecked(true);
-
-                    if (checkBox.isChecked()){
-                        count++;
-                        weeklyUsage += UsageConverter.convertStringToHour(timeText.getText().toString());
-                        appsViewModel.addApp(appsList.get(adapterPosition));
-                    } else {
-                        count--;
-                        weeklyUsage -= UsageConverter.convertStringToHour(timeText.getText().toString());
-                        appsViewModel.deleteApp(appsList.get(adapterPosition));
-                    }
+                    checkBox.setChecked(!checkBox.isChecked());
+                    view.performClick();
 
                     setWeeklyUsage();
                 });

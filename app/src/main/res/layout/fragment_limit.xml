@@ -65,10 +65,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="75dp"
         android:layout_marginEnd="15dp"
-        app:cardCornerRadius="15dp"
         android:background="@color/aside_color"
+        app:cardCornerRadius="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardView">
@@ -138,15 +138,15 @@
         app:layout_constraintStart_toStartOf="@+id/cardView3"
         app:layout_constraintTop_toBottomOf="@+id/cardView3" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/selected_app_list"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_confirm"
-        app:layout_constraintEnd_toEndOf="@+id/cardView3"
-        app:layout_constraintStart_toStartOf="@+id/cardView3"
-        app:layout_constraintTop_toBottomOf="@+id/tv_info_reduction" />
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/selected_app_list"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/btn_confirm"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/cardView3"-->
+<!--        app:layout_constraintStart_toStartOf="@+id/cardView3"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/tv_info_reduction" />-->
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btn_back"

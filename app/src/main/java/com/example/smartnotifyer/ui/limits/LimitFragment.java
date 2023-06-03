@@ -21,7 +21,7 @@ import com.example.smartnotifyer.R;
 import com.example.smartnotifyer.alarm.AlarmReceiver;
 import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
-import com.example.smartnotifyer.ui.UsageConverter;
+import com.example.smartnotifyer.ui.stats.UsageConverter;
 import com.example.smartnotifyer.ui.apps.AppsFragment;
 import com.example.smartnotifyer.ui.stats.StatsFragment;
 
