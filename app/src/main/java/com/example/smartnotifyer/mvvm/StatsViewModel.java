@@ -35,6 +35,7 @@ public class StatsViewModel extends AndroidViewModel {
     }
 
     public List<Stat> getAllStats(){
+        refreshStatList();
         return appDatabase.statDao().getAllStats();
     }
 

@@ -51,14 +51,6 @@ public class PermissionFragment extends Fragment {
                 transaction.addToBackStack(null);
                 transaction.commit();
 
-                AsyncTask.execute(() -> {
-                    List<App> apps = appsViewModel.getAllApps();
-
-                    for (int i = 0; i < apps.size(); i++) {
-                        Log.i("SELECTED APPS", apps.get(i).toString());
-                    }
-                });
-
             } else {
                 AppsFragment fragment = new AppsFragment();
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
@@ -109,8 +101,8 @@ public class PermissionFragment extends Fragment {
 
     public void buildDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        builder.setTitle("Request app usage permission?");
-        builder.setMessage("You have to give permission to view device usage statistics for this app to work. Only the amount of time spent in each app will be accessed. No personal information will be exposed.");
+        builder.setTitle("Request app usage permission");
+        builder.setMessage("You have to give permission to view device usage statistics for this app to work. Only the amount of time spent in each app will be accessed.\n\n");
 
         builder.setPositiveButton("Enable", (dialog, which) -> startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS));
         builder.setNegativeButton("Cancel", null);

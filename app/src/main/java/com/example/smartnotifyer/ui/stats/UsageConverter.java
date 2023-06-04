@@ -8,7 +8,10 @@ import android.provider.Settings;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.smartnotifyer.database.Stat;
+
 import java.text.DecimalFormat;
+import java.util.List;
 
 public class UsageConverter {
     public static DecimalFormat decimalFormat = new DecimalFormat("#.##");
@@ -41,5 +44,19 @@ public class UsageConverter {
             String minutesString = timeString.split(" ")[0];
             return Long.parseLong(minutesString);
         }
+    }
+
+    public static List<Stat> deleteDuplicates(List<Stat> stats){
+
+        for (int i = 0; i < stats.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                if (stats.get(i).statName.equals(stats.get(j).statName)){
+                    stats.remove(j);
+                    break;
+                }
+            }
+        }
+
+        return stats;
     }
 }

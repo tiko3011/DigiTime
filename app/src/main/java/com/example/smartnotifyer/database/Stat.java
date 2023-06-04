@@ -43,7 +43,7 @@ public class Stat implements Comparable<Stat>{
 
     @Override
     public String toString() {
-        return "Stat name: --> " + statName;
+        return "Stat name: --> " + statName + "    Time: --> " + statTime / 60000;
     }
 
     @Override

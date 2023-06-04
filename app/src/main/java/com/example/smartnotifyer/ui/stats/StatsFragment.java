@@ -1,10 +1,13 @@
 package com.example.smartnotifyer.ui.stats;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -21,14 +24,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartnotifyer.R;
+import com.example.smartnotifyer.alarm.AlarmReceiver;
 import com.example.smartnotifyer.database.App;
 import com.example.smartnotifyer.database.Stat;
 import com.example.smartnotifyer.mvvm.AppsViewModel;
@@ -37,16 +41,19 @@ import com.example.smartnotifyer.ui.apps.AppsFragment;
 import com.example.smartnotifyer.ui.limits.LimitFragment;
 import com.example.smartnotifyer.ui.permission.PermissionFragment;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StatsFragment extends Fragment {
     Toolbar toolbar;
+    TextView tvUsageApps;
+    TextView tvUsageLimit;
+    TextView tvUsageSelectedApps;
 
     private final long hour = 60 * 60 * 1000;
     private long end = System.currentTimeMillis();
     private long start = end - hour;
+    private long usageLimit;
 
     private List<SelectedApp> selectedApps = new ArrayList<>();
 
@@ -55,9 +62,14 @@ public class StatsFragment extends Fragment {
     private StatsViewModel statsViewModel;
     private AppsViewModel appsViewModel;
 
+    private Handler handler = new Handler();
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int DELAY_MILLISECONDS = 5000; // 5 seconds
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_stats, container, false);
+        SharedPreferences sharedPreferences = requireContext().getApplicationContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        usageLimit = sharedPreferences.getLong("usageLimit", 0);
 
         toolbar = root.findViewById(R.id.toolbar);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
@@ -75,6 +87,8 @@ public class StatsFragment extends Fragment {
 
         statsViewModel.getStats().observe(getViewLifecycleOwner(), stats -> {
             statAdapter.setStatsList(stats);
+
+            AlarmReceiver.stats.addAll(stats);
         });
 
 
@@ -85,26 +99,72 @@ public class StatsFragment extends Fragment {
 
         AsyncTask.execute(() -> {
             List<App> apps = appsViewModel.getAllApps();
-            Log.i("KA TAGSS BIIH", "Apps: --> " + apps.size());
+            Log.i("APP_SIZE_TAG", "Apps: --> " + apps.size());
 
             for (int i = 0; i < apps.size(); i++) {
                 selectedApps.add(new SelectedApp(apps.get(i).appName));
             }
-            Log.i("KA TAGSS BIIH", "Selected: --> " + selectedApps.size());
+            Log.i("APP_SELECTED_TAG", "Selected: --> " + selectedApps.size());
             statAdapterSelected.setSelectedApps(selectedApps);
+
         });
 
         statsViewModel.deleteAllStats();
         statsViewModel.addStatsFromSystemDaily(start, end);
         statsViewModel.deleteDuplicates();
 
+        tvUsageSelectedApps = root.findViewById(R.id.tv_usage_selected_apps);
+        tvUsageLimit = root.findViewById(R.id.tv_usage_limit);
+        tvUsageApps = root.findViewById(R.id.tv_usage_apps);
+
+        AsyncTask.execute(() -> {
+            List<Stat> stats = new ArrayList<>();
+            stats.addAll(statsViewModel.getAllStats());
+
+            int usage = 0;
+            for (int i = 0; i < stats.size(); i++) {
+                usage += stats.get(i).statTime;
+            }
+
+            List<App> selectedApps = new ArrayList<>();
+            selectedApps.addAll(appsViewModel.getAllApps());
+
+            int usageSelected = 0;
+            for (int i = 0; i < selectedApps.size(); i++) {
+                for (int j = 0; j < stats.size(); j++) {
+                    if (selectedApps.get(i).appName.equals(stats.get(j).statName)){
+                        usageSelected += stats.get(j).statTime;
+                    }
+                }
+            }
+
+            tvUsageApps.setText(UsageConverter.convertMilliToString(usage));
+            tvUsageSelectedApps.setText(UsageConverter.convertMilliToString(usageSelected));
+            tvUsageLimit.setText(UsageConverter.convertMinuteToString(usageLimit));
+        });
+
+        checkNotificationPermission();
         return root;
     }
 
+    private void checkNotificationPermission() {
+        handler.postDelayed(() -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST_CODE);
+                }
+            }
+        }, DELAY_MILLISECONDS);
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -112,7 +172,6 @@ public class StatsFragment extends Fragment {
         inflater.inflate(R.menu.menu_item, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();

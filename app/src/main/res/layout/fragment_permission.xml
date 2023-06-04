@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.permission.PermissionFragment"
-    android:background="@color/blue_black">
+    android:background="@color/main_color">
 
     <TextView
         android:id="@+id/info_tv_select"
@@ -15,7 +15,7 @@
         android:layout_marginTop="200dp"
         android:fontFamily="@font/montserrat_bold"
         android:text="Permission"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

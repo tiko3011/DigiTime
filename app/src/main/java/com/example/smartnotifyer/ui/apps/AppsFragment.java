@@ -155,7 +155,7 @@ public class AppsFragment extends Fragment {
                 holder.timeText.setText(appUsage);
                 holder.checkBox.setChecked(isChecked);
             } catch (PackageManager.NameNotFoundException e) {
-                Log.i("ERROR_APPS", packageName);
+                Log.i("ERROR APPS", packageName);
             }
         }
 
