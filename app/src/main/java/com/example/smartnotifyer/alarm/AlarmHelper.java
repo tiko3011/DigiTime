@@ -62,16 +62,17 @@ public class AlarmHelper {
                 usage += stats.get(i).statTime / 60000;
             }
 
-            Log.i("Limits", "UsageLimit: --> " + usagelimit);
-            Log.i("Limits", "Usage: --> " + usage);
             isLimitReached = usage >= usagelimit;
         }
+        Log.i("Limits", "UsageLimit: --> " + usagelimit);
+        Log.i("Limits", "Usage: --> " + usage);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isLimitReached) {
             sentNotification("Limit", "You reached usage limit", context);
 
             if(alarmManager.canScheduleExactAlarms()) {
                 //Setting alarm in 1 minute
+                stopAlarm();
                 long msToOff = System.currentTimeMillis() + 1000 * 60;
                 alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOff, null), alarmIntent);;
             }

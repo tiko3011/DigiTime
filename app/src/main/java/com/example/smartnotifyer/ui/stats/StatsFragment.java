@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartnotifyer.R;
 import com.example.smartnotifyer.alarm.AlarmReceiver;
@@ -41,16 +42,19 @@ import com.example.smartnotifyer.ui.apps.AppsFragment;
 import com.example.smartnotifyer.ui.limits.LimitFragment;
 import com.example.smartnotifyer.ui.permission.PermissionFragment;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatsFragment extends Fragment {
+public class StatsFragment extends Fragment{
     Toolbar toolbar;
     TextView tvUsageApps;
     TextView tvUsageLimit;
     TextView tvUsageSelectedApps;
 
-    private final long hour = 60 * 60 * 1000;
+    LocalTime localTime = LocalTime.now();
+
+    private final long hour = (long) 60 * 60 * 1000 * localTime.getHour();
     private long end = System.currentTimeMillis();
     private long start = end - hour;
     private long usageLimit;
@@ -64,7 +68,7 @@ public class StatsFragment extends Fragment {
 
     private Handler handler = new Handler();
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
-    private static final int DELAY_MILLISECONDS = 5000; // 5 seconds
+    private static final int DELAY_MILLISECONDS = 4000; // 4 seconds
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_stats, container, false);
@@ -184,12 +188,6 @@ public class StatsFragment extends Fragment {
             transaction.commit();
         } else if (id == R.id.Limit) {
             LimitFragment fragment = new LimitFragment();
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_main, fragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        } else if (id == R.id.Access) {
-            PermissionFragment fragment = new PermissionFragment();
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_main, fragment);
             transaction.addToBackStack(null);

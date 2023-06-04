@@ -33,9 +33,9 @@ public class AlarmReceiver extends BroadcastReceiver{
         alarmHelper = new AlarmHelper();
         alarmHelper.setAlarmInNextMinute(context.getApplicationContext()); count++;
 
-        if (count == 20){
-            alarmHelper.stopAlarm();
-        }
+//        if (count == 20){
+//            alarmHelper.stopAlarm();
+//        }
     }
 
     public void getSelectedStats(){

@@ -12,10 +12,5 @@
         android:icon="@drawable/ic_menu_recent_history"
         android:title="Set usage limit"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/Access"
-        android:icon="@drawable/ic_notification_clear_all"
-        android:title="Disable Usage Access"
-        app:showAsAction="never" />
 
 </menu>
