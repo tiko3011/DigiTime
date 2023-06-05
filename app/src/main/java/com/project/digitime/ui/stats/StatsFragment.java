@@ -1,7 +1,6 @@
 package com.project.digitime.ui.stats;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -18,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.digitime.R;
+import com.project.digitime.adapter.SelectedAppAdapter;
 import com.project.digitime.alarm.AlarmReceiver;
 import com.project.digitime.database.App;
 import com.project.digitime.database.Stat;
@@ -54,8 +55,9 @@ public class StatsFragment extends Fragment{
     LocalTime localTime = LocalTime.now();
 
     private final long hour = (long) 60 * 60 * 1000 * localTime.getHour();
+    private final long minute = (long) 60 * 1000 * localTime.getMinute();
     private long end = System.currentTimeMillis();
-    private long start = end - hour;
+    private long start = end - hour - minute;
 
     private long usageSelected;
     private long usageLimit;
@@ -76,6 +78,10 @@ public class StatsFragment extends Fragment{
         View root = inflater.inflate(R.layout.fragment_stats, container, false);
         SharedPreferences sharedPreferences = requireContext().getApplicationContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         usageLimit = sharedPreferences.getLong("usageLimit", 0);
+
+        tvUsageSelectedApps = root.findViewById(R.id.tv_usage_selected_apps);
+        tvUsageLimit = root.findViewById(R.id.tv_usage_limit);
+        tvUsageApps = root.findViewById(R.id.tv_usage_apps);
 
         toolbar = root.findViewById(R.id.toolbar);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
@@ -100,7 +106,7 @@ public class StatsFragment extends Fragment{
 
         RecyclerView recyclerViewSelected = root.findViewById(R.id.selected_stat_list);
         recyclerViewSelected.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        statAdapterSelected = new SelectedAppAdapter();
+        statAdapterSelected = new SelectedAppAdapter(requireContext());
         recyclerViewSelected.setAdapter(statAdapterSelected);
 
         AsyncTask.execute(() -> {
@@ -118,10 +124,6 @@ public class StatsFragment extends Fragment{
         statsViewModel.deleteAllStats();
         statsViewModel.addStatsFromSystemDaily(start, end);
         statsViewModel.deleteDuplicates();
-
-        tvUsageSelectedApps = root.findViewById(R.id.tv_usage_selected_apps);
-        tvUsageLimit = root.findViewById(R.id.tv_usage_limit);
-        tvUsageApps = root.findViewById(R.id.tv_usage_apps);
 
         AsyncTask.execute(() -> {
             List<Stat> stats = new ArrayList<>();
@@ -256,56 +258,6 @@ public class StatsFragment extends Fragment{
                 nameText = view.findViewById(R.id.item_stat_name_tv);
                 timeText = view.findViewById(R.id.item_stat_time_tv);
                 icon = view.findViewById(R.id.item_stat_icon_iv);
-            }
-        }
-    }
-
-    private class SelectedAppAdapter extends RecyclerView.Adapter<SelectedAppAdapter.SelectedAppCardHolder> {
-        List<SelectedApp> selectedApps;
-
-        public void setSelectedApps(List<SelectedApp> selectedApps) {
-            this.selectedApps = new ArrayList<>(selectedApps);
-            notifyDataSetChanged();
-        }
-        public void setFilteredList(List<SelectedApp> filteredList){
-            this.selectedApps = filteredList;
-            notifyDataSetChanged();
-        }
-
-
-        @NonNull
-        @Override
-        public SelectedAppCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            Context context = parent.getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-            return new SelectedAppCardHolder(inflater.inflate(R.layout.view_icon_list_item, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull SelectedAppCardHolder holder, int position) {
-            String name = selectedApps.get(position).selectedAppName;
-
-            try {
-                PackageManager packageManager = requireActivity().getApplication().getPackageManager();
-                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(name, 0);
-                Drawable icon = packageManager.getApplicationIcon(applicationInfo);
-
-                holder.icon.setImageDrawable(icon);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return selectedApps != null ? selectedApps.size() : 0;
-        }
-
-        public class SelectedAppCardHolder extends RecyclerView.ViewHolder {
-            ImageView icon;
-            public SelectedAppCardHolder(View view) {
-                super(view);
-                icon = view.findViewById(R.id.item_icon);
             }
         }
     }

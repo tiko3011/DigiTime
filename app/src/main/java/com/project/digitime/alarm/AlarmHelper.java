@@ -31,29 +31,26 @@ public class AlarmHelper {
     private PendingIntent alarmIntent;
 
     public static final String CHANNEL_ID = "DIGITIME_ID";
-    private int alarmCount = 0;
+    int notificationId = 606;
 
-    public void setAlarmInNextMinute(Context context) { alarmCount++;
+    public void setAlarmInNextMinute(Context context) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(context, AlarmReceiver.class);
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-
         alarmManager.cancel(alarmIntent);
 
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
             //Setting alarm in 5 seconds
-            long msToOff = System.currentTimeMillis() + 1000 * 5;
-            alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOff, null), alarmIntent);;
+            long msToOn = System.currentTimeMillis() + 1000 * 2;
+            alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOn, null), alarmIntent);
         }
 
-        if (alarmCount > 0){
-            usageLimit = AlarmReceiver.usageLimit;
-            stats.clear();
-            stats.addAll(AlarmReceiver.selectedStats);
-        }
+        usageLimit = AlarmReceiver.usageLimit;
+        stats.clear();
+        stats.addAll(AlarmReceiver.selectedStats);
 
-        if (stats.size() != 0){
+        if (stats.size() != 0) {
             usage = 0;
             for (int i = 0; i < stats.size(); i++) {
                 usage += stats.get(i).statTime / 60000;
@@ -67,11 +64,11 @@ public class AlarmHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isLimitReached) {
             sentNotification("DigiTime", "You reached usage limit", context);
 
-            if(alarmManager.canScheduleExactAlarms()) {
+            if (alarmManager.canScheduleExactAlarms()) {
                 //Setting alarm in 1 minute
                 stopAlarm();
-                long msToOff = System.currentTimeMillis() + 1000 * 60;
-                alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOff, null), alarmIntent);;
+                long msToOff = System.currentTimeMillis() + 1000 * 20;
+                alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOff, null), alarmIntent);
             }
         }
 
@@ -85,7 +82,7 @@ public class AlarmHelper {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.S)
-    public void sentNotification(String title, String text, Context context){
+    public void sentNotification(String title, String text, Context context) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
 
         builder.setSmallIcon(R.drawable.ic_notification)
@@ -109,7 +106,7 @@ public class AlarmHelper {
         NotificationChannel notificationChannel =
                 notificationManager.getNotificationChannel(CHANNEL_ID);
 
-        if (notificationChannel == null){
+        if (notificationChannel == null) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
 
             notificationChannel = new NotificationChannel(CHANNEL_ID, "Description", importance);
@@ -118,8 +115,6 @@ public class AlarmHelper {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
-        Random random = new Random();
-        int notificationId = random.nextInt(1000);
         notificationManager.notify(notificationId, builder.build());
     }
 }

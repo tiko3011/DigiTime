@@ -63,19 +63,11 @@ public class PermissionFragment extends Fragment {
         btnPermission = root.findViewById(R.id.btn_permission);
         btnPermission.setOnClickListener(v -> {
             if (isUsageGranted) {
-                if (isButtonClicked){
-                    StatsFragment fragment = new StatsFragment();
-                    FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.fragment_main, fragment);
-                    transaction.addToBackStack(null);
-                    transaction.commit();
-                } else {
                     AppsFragment fragment = new AppsFragment();
                     FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_main, fragment);
                     transaction.addToBackStack(null);
                     transaction.commit();
-                }
             } else {
                 buildDialog();
             }

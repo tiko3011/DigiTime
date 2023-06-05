@@ -9,7 +9,10 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +21,16 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.project.digitime.R;
+import com.project.digitime.adapter.SelectedAppAdapter;
 import com.project.digitime.alarm.AlarmReceiver;
 import com.project.digitime.database.App;
 import com.project.digitime.mvvm.AppsViewModel;
+import com.project.digitime.ui.stats.SelectedApp;
 import com.project.digitime.ui.stats.UsageConverter;
 import com.project.digitime.ui.apps.AppsFragment;
 import com.project.digitime.ui.stats.StatsFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LimitFragment extends Fragment {
@@ -32,6 +38,8 @@ public class LimitFragment extends Fragment {
     public static long usageLimit;
     AppsViewModel appsViewModel;
 
+    private List<SelectedApp> selectedApps = new ArrayList<>();
+    private SelectedAppAdapter statAdapterSelected;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -51,12 +59,30 @@ public class LimitFragment extends Fragment {
         SeekBar barSetLimit = root.findViewById(R.id.bar_set_limit);
 
         if (weeklyUsage == 0){
-            barSetLimit.setMax(300);
-            barSetLimit.setProgress(150);
+            barSetLimit.setMax(60);
+            barSetLimit.setProgress(30);
         } else {
             barSetLimit.setMax(weeklyUsage * 2);
             barSetLimit.setProgress(weeklyUsage);
-        }
+        } usageLimit = barSetLimit.getMax() - barSetLimit.getProgress();
+
+
+        RecyclerView recyclerViewSelected = root.findViewById(R.id.selected_stat_list);
+        recyclerViewSelected.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        statAdapterSelected = new SelectedAppAdapter(requireContext());
+        recyclerViewSelected.setAdapter(statAdapterSelected);
+
+        AsyncTask.execute(() -> {
+            List<App> apps = appsViewModel.getAllApps();
+            Log.i("APP_SIZE_TAG", "Apps: --> " + apps.size());
+
+            for (int i = 0; i < apps.size(); i++) {
+                selectedApps.add(new SelectedApp(apps.get(i).appName));
+            }
+            Log.i("APP_SELECTED_TAG", "Selected: --> " + selectedApps.size());
+            statAdapterSelected.setSelectedApps(selectedApps);
+
+        });
 
         barSetLimit.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -64,7 +90,7 @@ public class LimitFragment extends Fragment {
                 tvTarget.setText(UsageConverter.convertMinuteToString(barSetLimit.getMax() - barSetLimit.getProgress()));
 
                 if (progress < weeklyUsage) {
-                    tvComment.setText("That's more than you normally use!");
+                    tvComment.setText("That's more than you use!");
                 } else if (progress == weeklyUsage) {
                     tvComment.setText("That's how much you use");
                 } else {
@@ -104,9 +130,6 @@ public class LimitFragment extends Fragment {
 
         Button btnBack = root.findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> {
-            editor.putBoolean("isNextClicked", false);
-            editor.apply();
-
             AppsFragment fragment = new AppsFragment();
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_main, fragment);

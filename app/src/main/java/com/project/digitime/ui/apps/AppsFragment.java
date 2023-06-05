@@ -47,6 +47,8 @@ public class AppsFragment extends Fragment {
     
     TextView tvWeeklyUsage;
     Button btnNext;
+
+    public String prefix = "Daily usage: ";
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_apps, container, false);
@@ -54,14 +56,17 @@ public class AppsFragment extends Fragment {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        editor.putBoolean("isNextClicked", false);
+        editor.apply();
+
         RecyclerView recyclerView = root.findViewById(R.id.app_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         appAdapter = new AppAdapter();
         recyclerView.setAdapter(appAdapter);
 
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
-        appsViewModel.deleteAllApps();
 
+        appsViewModel.deleteAllApps();
         AlarmReceiver.selectedApps.clear();
 
         PackageManager packageManager = requireActivity().getApplication().getPackageManager();
@@ -151,7 +156,7 @@ public class AppsFragment extends Fragment {
 
                 holder.icon.setImageDrawable(icon);
                 holder.nameText.setText(name);
-                holder.timeText.setText(appUsage);
+                holder.timeText.setText(prefix + appUsage);
                 holder.checkBox.setChecked(isChecked);
             } catch (PackageManager.NameNotFoundException e) {
                 Log.i("ERROR APPS", packageName);
@@ -188,13 +193,13 @@ public class AppsFragment extends Fragment {
                         checkBox.setChecked(false);
 //                        view.getBackground().clearColorFilter();
                         count--;
-                        weeklyUsage -= UsageConverter.convertStringToHour(timeText.getText().toString());
+                        weeklyUsage -= UsageConverter.convertStringToHour(timeText.getText().toString().substring(prefix.length()).trim());
                         appsViewModel.deleteApp(appsList.get(adapterPosition));
                     } else {
                         count++;
                         checkBox.setChecked(true);
 //                        view.getBackground().setColorFilter(view.getResources().getColor(R.color.selectedTint), PorterDuff.Mode.SRC_ATOP);
-                        weeklyUsage += UsageConverter.convertStringToHour(timeText.getText().toString());
+                        weeklyUsage += UsageConverter.convertStringToHour(timeText.getText().toString().substring(prefix.length()).trim());
                         appsViewModel.addApp(appsList.get(adapterPosition));
                     }
                     appsList.get(adapterPosition).setChecked(checkBox.isChecked());
@@ -205,8 +210,6 @@ public class AppsFragment extends Fragment {
                 checkBox.setOnClickListener(v -> {
                     checkBox.setChecked(!checkBox.isChecked());
                     view.performClick();
-
-                    setWeeklyUsage();
                 });
             }
         }
