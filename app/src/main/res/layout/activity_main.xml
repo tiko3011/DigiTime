@@ -8,7 +8,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_main"
-        android:name="com.example.smartnotifyer.ui.permission.PermissionFragment"
+        android:name="com.project.digitime.ui.permission.PermissionFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/main_color"

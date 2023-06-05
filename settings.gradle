@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Smart Notifyer"
+rootProject.name = "Digi Time"
 include ':app'
