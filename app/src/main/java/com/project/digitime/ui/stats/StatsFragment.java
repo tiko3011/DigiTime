@@ -99,8 +99,6 @@ public class StatsFragment extends Fragment{
 
         statsViewModel.getStats().observe(getViewLifecycleOwner(), stats -> {
             statAdapter.setStatsList(stats);
-
-            AlarmReceiver.stats.addAll(stats);
         });
 
 

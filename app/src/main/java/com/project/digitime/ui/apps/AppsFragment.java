@@ -67,7 +67,6 @@ public class AppsFragment extends Fragment {
         appsViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
 
         appsViewModel.deleteAllApps();
-        AlarmReceiver.selectedApps.clear();
 
         PackageManager packageManager = requireActivity().getApplication().getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN);

@@ -27,6 +27,7 @@ import com.project.digitime.ui.permission.UsagePermission;
 import com.project.digitime.ui.permission.PermissionFragment;
 import com.project.digitime.ui.stats.UsageConverter;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,11 +41,13 @@ public class MainActivity extends AppCompatActivity {
     public static List<Stat> stats = new ArrayList<>();
     public static List<Stat> selectedStats = new ArrayList<>();
 
-    private long usageLimit;
-    public static long usage;
+    public static long usageLimit = 0;
+    public static long usage = 0;
     boolean isLimitReached = false;
 
+    SharedPreferences sharedPreferences;
     private Handler handler;
+    private Runnable runnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,41 +57,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         checkPermission();
 
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         appsViewModel = new ViewModelProvider(this).get(AppsViewModel.class);
         statsViewModel = new ViewModelProvider(this).get(StatsViewModel.class);
 
-        AsyncTask.execute(() -> {
-            List<App> apps = appsViewModel.getAllApps();
-
-            AlarmReceiver.selectedApps.clear();
-            AlarmReceiver.selectedApps.addAll(apps);
-        });
-
         ////////////////////////////////////
         ////////////////////////////////////
         ////////////////////////////////////
 
-
-//        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-//        usageLimit = sharedPreferences.getLong("usageLimit", 0);
-//
-//        statsViewModel.getStats().observe(this, stats -> {
-//             MainActivity.stats.addAll(stats);
-//        });
-//
-//        UsageConverter.deleteDuplicates(stats);
-//        getSelectedStats();
-//
-//        if (stats.size() != 0) {
-//            usage = 0;
-//            for (int i = 0; i < stats.size(); i++) {
-//                usage += stats.get(i).statTime / 60000;
-//            }
-//
-//            isLimitReached = usage >= usageLimit;
-//        }
-//        Log.i("Limits", "UsageLimit: --> " + usageLimit);
-//        Log.i("Limits", "Usage: --> " + usage);
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                updateUI();
+                handler.postDelayed(this, 5 * 1000);
+            }
+        }; handler.post(runnable);
 
         ////////////////////////////////////
         ////////////////////////////////////
@@ -132,14 +116,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void getSelectedStats(){
-        selectedStats.clear();
-        for (int i = 0; i < selectedApps.size(); i++) {
-            for (int j = 0; j < stats.size(); j++) {
-                if (selectedApps.get(i).appName.equals(stats.get(j).statName)){
-                    selectedStats.add(stats.get(j));
+    private void updateUI() {
+        usageLimit = sharedPreferences.getLong("usageLimit", 0);
+
+//        long endTime = System.currentTimeMillis();
+//        long startTime = endTime - ((long) LocalTime.now().getHour() * 60 * 60 * 1000 + (long) LocalTime.now().getMinute() * 60 * 1000);
+
+        AsyncTask.execute(() -> {
+            List<Stat> stats = new ArrayList<>();
+
+//            statsViewModel.deleteAllStats();
+//            statsViewModel.addStatsFromSystemDaily(startTime, endTime);
+            stats.addAll(statsViewModel.getAllStats());
+
+            List<App> selectedApps = new ArrayList<>();
+            selectedApps.addAll(appsViewModel.getAllApps());
+
+            int usageSelected = 0;
+            for (int i = 0; i < selectedApps.size(); i++) {
+                for (int j = 0; j < stats.size(); j++) {
+                    if (selectedApps.get(i).appName.equals(stats.get(j).statName)){
+                        usageSelected += stats.get(j).statTime;
+                    }
                 }
             }
-        }
+
+            MainActivity.usage = usageSelected / 60000;
+        });
+
+        Log.i("Limits Of MAIN ACTIVITY", "UsageLimit: --> " + usageLimit);
+        Log.i("Limits Of MAIN ACTIVITY", "Usage: --> " + usage);
     }
 }

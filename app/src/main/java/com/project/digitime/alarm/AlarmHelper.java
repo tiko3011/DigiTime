@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Random;
 
 public class AlarmHelper {
-    private long usageLimit;
-    private List<Stat> stats = new ArrayList<>();
-    public static long usage;
+    public long usageLimit = MainActivity.usageLimit;
+    public static long usage = MainActivity.usage;
     boolean isLimitReached = false;
 
     private AlarmManager alarmManager;
@@ -46,23 +45,20 @@ public class AlarmHelper {
             alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(msToOn, null), alarmIntent);
         }
 
-        usageLimit = AlarmReceiver.usageLimit;
-        stats.clear();
-        stats.addAll(AlarmReceiver.selectedStats);
+        usageLimit = MainActivity.usageLimit;
+        usage = MainActivity.usage;
+        isLimitReached = usage > usageLimit;
 
-        if (stats.size() != 0) {
-            usage = 0;
-            for (int i = 0; i < stats.size(); i++) {
-                usage += stats.get(i).statTime / 60000;
-            }
-
-            isLimitReached = usage >= usageLimit;
-        }
-        Log.i("Limits", "UsageLimit: --> " + usageLimit);
-        Log.i("Limits", "Usage: --> " + usage);
+        Log.i("Limits Of ALARM", "UsageLimit: --> " + usageLimit);
+        Log.i("Limits Of ALARM", "Usage: --> " + usage);
+        Log.i("Limits Of ALARM", "IsLimitReached: --> " + isLimitReached);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isLimitReached) {
             sentNotification("DigiTime", "You reached usage limit", context);
+
+            Log.i("Limits Of NOTIFICATION", "UsageLimit: --> " + usageLimit);
+            Log.i("Limits Of NOTIFICATION", "Usage: --> " + usage);
+            Log.i("Limits Of NOTIFICATION", "IsLimitReached: --> " + isLimitReached);
 
             if (alarmManager.canScheduleExactAlarms()) {
                 //Setting alarm in 1 minute

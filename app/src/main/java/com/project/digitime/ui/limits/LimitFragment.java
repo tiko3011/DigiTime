@@ -114,13 +114,6 @@ public class LimitFragment extends Fragment {
             editor.putLong("usageLimit", usageLimit);
             editor.apply();
 
-            AsyncTask.execute(() -> {
-                List<App> apps = appsViewModel.getAllApps();
-
-                AlarmReceiver.selectedApps.clear();
-                AlarmReceiver.selectedApps.addAll(apps);
-            });
-
             StatsFragment fragment = new StatsFragment();
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_main, fragment);
