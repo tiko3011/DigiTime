@@ -7,13 +7,20 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.project.digitime.ui.stats.UsageConverter;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TrackingService extends Service {
     @NotNull
@@ -29,8 +36,16 @@ public class TrackingService extends Service {
     @NotNull
     public static final String STOPWATCH_ACTION = "STOPWATCH_ACTION";
 
-    private NotificationManager notificationManager;
 
+    public static boolean isUsageLimitReached = false;
+    String contentText = "";
+    String title = "Tracking usage";
+
+    int testInt = 0;
+
+    private Handler handler;
+    private Runnable runnable;
+    private NotificationManager notificationManager;
     @org.jetbrains.annotations.Nullable
     public IBinder onBind(@Nullable Intent intent) {
         return null;
@@ -57,6 +72,24 @@ public class TrackingService extends Service {
 
     private void moveToForeground() {
         this.startForeground(1, this.buildNotification());
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                boolean isRunning = MainActivity.usage < MainActivity.usageLimit;
+
+                updateNotification();
+                if (isRunning) {
+                    isUsageLimitReached = false;
+                    handler.postDelayed(this, 100);
+                } else {
+                    isUsageLimitReached = true;
+                    handler.removeCallbacks(runnable);
+                }
+
+            }
+        }; handler.post(runnable);
     }
 
     private void moveToBackground() {
@@ -70,6 +103,8 @@ public class TrackingService extends Service {
 
     private void createChannel() {
         NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Tracking", NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel.setShowBadge(false);
+
         NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(notificationChannel);
     }
@@ -79,21 +114,36 @@ public class TrackingService extends Service {
     }
 
     private Notification buildNotification() {
-        String title = "Tracking usage";
-
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
                 .setOngoing(true)
-                .setContentText("You using your phone too much!!")
+                .setContentText(String.valueOf(contentText))
                 .setColorized(true)
                 .setColor(Color.parseColor("#BEAEE2"))
                 .setSmallIcon(R.drawable.ic_menu_recent_history)
                 .setOnlyAlertOnce(true)
-                .setContentIntent(pIntent)
+                .setProgress((int) MainActivity.usageLimit, (int) MainActivity.usage, false)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true).build();
+    }
+
+    private void updateNotification() {
+        testInt++;
+        double usagePercent = (double) MainActivity.usageMilli / (double) MainActivity.usageLimitMilli * 100;
+
+        if (usagePercent <= 100){
+            title = "Tracking usage";
+            contentText = "Used " + UsageConverter.decimalFormat.format(usagePercent) + "% of daily usage limit" ;
+        } else {
+            title = "Usage limit Reached !";
+            contentText = "You reached your daily usage limit" ;
+        }
+
+
+        notificationManager.notify(1, buildNotification());
     }
 }
 

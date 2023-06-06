@@ -1,6 +1,7 @@
 package com.project.digitime.alarm;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,6 +16,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.project.digitime.MainActivity;
 import com.project.digitime.R;
+import com.project.digitime.TrackingService;
 import com.project.digitime.database.Stat;
 
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class AlarmHelper {
 
         usageLimit = MainActivity.usageLimit;
         usage = MainActivity.usage;
-        isLimitReached = usage > usageLimit;
+        isLimitReached = TrackingService.isUsageLimitReached;
 
         Log.i("Limits Of ALARM", "UsageLimit: --> " + usageLimit);
         Log.i("Limits Of ALARM", "Usage: --> " + usage);
@@ -106,6 +108,7 @@ public class AlarmHelper {
             int importance = NotificationManager.IMPORTANCE_HIGH;
 
             notificationChannel = new NotificationChannel(CHANNEL_ID, "Description", importance);
+            notificationChannel.setShowBadge(false);
             notificationChannel.setLightColor(Color.GREEN);
             notificationChannel.enableVibration(true);
             notificationManager.createNotificationChannel(notificationChannel);

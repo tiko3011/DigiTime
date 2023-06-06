@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.animation.AnticipateInterpolator;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.project.digitime.alarm.AlarmHelper;
@@ -30,6 +31,7 @@ import com.project.digitime.database.Stat;
 import com.project.digitime.databinding.ActivityMainBinding;
 import com.project.digitime.mvvm.AppsViewModel;
 import com.project.digitime.mvvm.StatsViewModel;
+import com.project.digitime.ui.limits.LimitFragment;
 import com.project.digitime.ui.permission.UsagePermission;
 import com.project.digitime.ui.permission.PermissionFragment;
 import com.project.digitime.ui.stats.UsageConverter;
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
     public static long endTime;
     public static long usageLimit = 0;
     public static long usage = 0;
+
+    public static long usageLimitMilli = 0;
+    public static long usageMilli = 0;
+
     boolean isLimitReached = false;
     boolean isButtonClicked = false;
 
@@ -79,13 +85,14 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 updateUI();
 
-                handler.postDelayed(this, 15 * 1000);
+                handler.postDelayed(this, 5 * 1000);
             }
         }; handler.post(runnable);
 
         alarmHelper = new AlarmHelper();
         alarmHelper.setAlarmInNextMinute(getApplicationContext());
     }
+
 
     @Override
     protected void onStart() {
@@ -136,7 +143,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        usageLimit = sharedPreferences.getLong("usageLimit", 0);
+        usageLimit = sharedPreferences.getLong("usageLimit", 300);
+        usageLimitMilli = usageLimit * 60 * 1000;
+
         isButtonClicked = UsagePermission.isUsageAccessGranted(this);
 
         AsyncTask.execute(() -> {
@@ -160,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             MainActivity.usage = usageSelected / 60000;
+            usageMilli = usageSelected;
         });
 
         Log.i("Limits Of MAIN ACTIVITY", "UsageLimit: --> " + usageLimit);

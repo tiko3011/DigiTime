@@ -76,7 +76,7 @@ public class StatsFragment extends Fragment{
 
     private Handler handler = new Handler();
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
-    private static final int DELAY_MILLISECONDS = 4000; // 4 seconds
+    private static final int DELAY_MILLISECONDS = 2500; // 2.5 seconds
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_stats, container, false);
@@ -178,7 +178,7 @@ public class StatsFragment extends Fragment{
                         intent.setData(Uri.parse("package:" + packageName));
                         startActivity(intent);
                     }
-                }, DELAY_MILLISECONDS + 3000);
+                }, DELAY_MILLISECONDS * 2);
 
             }
         }, DELAY_MILLISECONDS);

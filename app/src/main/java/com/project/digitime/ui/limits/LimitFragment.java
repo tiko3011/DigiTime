@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.project.digitime.MainActivity;
 import com.project.digitime.R;
 import com.project.digitime.adapter.SelectedAppAdapter;
 import com.project.digitime.alarm.AlarmReceiver;
@@ -47,6 +48,7 @@ public class LimitFragment extends Fragment {
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         weeklyUsage = sharedPreferences.getInt("averageWeeklyUsage", AppsFragment.weeklyUsage);
+        usageLimit = sharedPreferences.getLong("usageLimit", 300);
 
         @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -57,15 +59,7 @@ public class LimitFragment extends Fragment {
         TextView tvComment = root.findViewById(R.id.tv_info_reduction);
 
         SeekBar barSetLimit = root.findViewById(R.id.bar_set_limit);
-
-        if (weeklyUsage == 0){
-            barSetLimit.setMax(60);
-            barSetLimit.setProgress(30);
-        } else {
-            barSetLimit.setMax(weeklyUsage * 2);
-            barSetLimit.setProgress(weeklyUsage);
-        } usageLimit = barSetLimit.getMax() - barSetLimit.getProgress();
-
+        barSetLimit.setProgress(weeklyUsage);
 
         RecyclerView recyclerViewSelected = root.findViewById(R.id.selected_stat_list);
         recyclerViewSelected.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -81,20 +75,19 @@ public class LimitFragment extends Fragment {
             }
             Log.i("APP_SELECTED_TAG", "Selected: --> " + selectedApps.size());
             statAdapterSelected.setSelectedApps(selectedApps);
-
         });
 
         barSetLimit.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvTarget.setText(UsageConverter.convertMinuteToString(barSetLimit.getMax() - barSetLimit.getProgress()));
+                tvTarget.setText(UsageConverter.convertMinuteToString(barSetLimit.getProgress()));
 
-                if (progress < weeklyUsage) {
+                if (progress > weeklyUsage) {
                     tvComment.setText("That's more than you use!");
                 } else if (progress == weeklyUsage) {
                     tvComment.setText("That's how much you use");
                 } else {
-                    double reductionPercent = (double) (barSetLimit.getProgress() - barSetLimit.getMax() / 2) / weeklyUsage * 100;
+                    double reductionPercent = 100 - (double) (barSetLimit.getProgress()) / weeklyUsage * 100;
                     tvComment.setText("That's a reduction of " + UsageConverter.decimalFormat.format(reductionPercent) + "% !");
                 }
             }
@@ -105,12 +98,13 @@ public class LimitFragment extends Fragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // Called when the user stops interacting with the SeekBar
-                usageLimit = barSetLimit.getMax() - barSetLimit.getProgress();
+                usageLimit = barSetLimit.getProgress();
             }
         });
 
         Button btnNext = root.findViewById(R.id.btn_confirm);
         btnNext.setOnClickListener(v -> {
+            usageLimit = barSetLimit.getProgress();
             editor.putLong("usageLimit", usageLimit);
             editor.apply();
 
