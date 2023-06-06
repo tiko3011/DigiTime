@@ -4,11 +4,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnticipateInterpolator;
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     public static long usageLimit = 0;
     public static long usage = 0;
     boolean isLimitReached = false;
+    boolean isNextClicked = false;
 
     SharedPreferences sharedPreferences;
     private Handler handler;
@@ -56,23 +62,25 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         checkPermission();
+        startTracking();
 
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         appsViewModel = new ViewModelProvider(this).get(AppsViewModel.class);
         statsViewModel = new ViewModelProvider(this).get(StatsViewModel.class);
+        statsViewModel.deleteAllStats();
 
         ////////////////////////////////////
         ////////////////////////////////////
         ////////////////////////////////////
 
-        handler = new Handler();
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                updateUI();
-                handler.postDelayed(this, 5 * 1000);
-            }
-        }; handler.post(runnable);
+//        handler = new Handler();
+//        runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                updateUI();
+//                handler.postDelayed(this, 5 * 1000);
+//            }
+//        }; handler.post(runnable);
 
         ////////////////////////////////////
         ////////////////////////////////////
@@ -80,6 +88,17 @@ public class MainActivity extends AppCompatActivity {
 
         alarmHelper = new AlarmHelper();
         alarmHelper.setAlarmInNextMinute(getApplicationContext());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        this.moveToBackground();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        this.moveToForeground();
     }
     @Override
     public void onBackPressed() {
@@ -89,6 +108,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         checkPermission();
+
+        IntentFilter statusFilter = new IntentFilter();
+        statusFilter.addAction(TrackingService.SERVICE_STATUS);
     }
     public void checkPermission(){
         PermissionFragment.isUsageGranted = UsagePermission.isUsageAccessGranted(getApplicationContext());
@@ -146,5 +168,24 @@ public class MainActivity extends AppCompatActivity {
 
         Log.i("Limits Of MAIN ACTIVITY", "UsageLimit: --> " + usageLimit);
         Log.i("Limits Of MAIN ACTIVITY", "Usage: --> " + usage);
+    }
+
+
+    private void startTracking() {
+        Intent stopwatchService = new Intent(this, TrackingService.class);
+        stopwatchService.putExtra(TrackingService.STOPWATCH_ACTION, TrackingService.START);
+        this.startService(stopwatchService);
+    }
+
+    private void moveToForeground() {
+        Intent stopwatchService = new Intent(this, TrackingService.class);
+        stopwatchService.putExtra(TrackingService.STOPWATCH_ACTION, TrackingService.MOVE_TO_FOREGROUND);
+        this.startService(stopwatchService);
+    }
+
+    private void moveToBackground() {
+        Intent stopwatchService = new Intent(this, TrackingService.class);
+        stopwatchService.putExtra(TrackingService.STOPWATCH_ACTION, TrackingService.MOVE_TO_BACKGROUND);
+        this.startService(stopwatchService);
     }
 }

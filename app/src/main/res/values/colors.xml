@@ -20,6 +20,10 @@
     <color name="error">#DC4545</color>
     <color name="success">#45DC6B</color>
 
+    <color name="light_gray">#F9F9F9</color>
+    <color name="purple">#BEAEE2</color>
+    <color name="lavender">#F7DBF0</color>
+
     <color name="selectedTint">#FFEBAC</color>
     <color name="aside_color_dark">#133453</color>
     <color name="main_color_dark">#0E273D</color>

@@ -1,15 +1,21 @@
 package com.project.digitime.ui.stats;
 
+import static android.content.Context.POWER_SERVICE;
+
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,7 +23,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,7 +39,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.digitime.R;
 import com.project.digitime.adapter.SelectedAppAdapter;
-import com.project.digitime.alarm.AlarmReceiver;
 import com.project.digitime.database.App;
 import com.project.digitime.database.Stat;
 import com.project.digitime.mvvm.AppsViewModel;
@@ -154,18 +158,31 @@ public class StatsFragment extends Fragment{
             });
         });
 
-        checkNotificationPermission();
+
+        checkAllPermissions();
         return root;
     }
 
-    private void checkNotificationPermission() {
+    private void checkAllPermissions() {
         handler.postDelayed(() -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST_CODE);
                 }
+                handler.postDelayed(() -> {
+                    Intent intent = new Intent();
+                    String packageName = requireActivity().getPackageName();
+                    PowerManager pm = (PowerManager) requireActivity().getSystemService(POWER_SERVICE);
+                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        intent.setData(Uri.parse("package:" + packageName));
+                        startActivity(intent);
+                    }
+                }, DELAY_MILLISECONDS + 3000);
+
             }
         }, DELAY_MILLISECONDS);
+
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
