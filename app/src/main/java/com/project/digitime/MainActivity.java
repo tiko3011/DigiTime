@@ -3,6 +3,8 @@ package com.project.digitime;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,10 +48,12 @@ public class MainActivity extends AppCompatActivity {
     public static List<Stat> stats = new ArrayList<>();
     public static List<Stat> selectedStats = new ArrayList<>();
 
+    public static long startTime;
+    public static long endTime;
     public static long usageLimit = 0;
     public static long usage = 0;
     boolean isLimitReached = false;
-    boolean isNextClicked = false;
+    boolean isButtonClicked = false;
 
     SharedPreferences sharedPreferences;
     private Handler handler;
@@ -69,22 +73,15 @@ public class MainActivity extends AppCompatActivity {
         statsViewModel = new ViewModelProvider(this).get(StatsViewModel.class);
         statsViewModel.deleteAllStats();
 
-        ////////////////////////////////////
-        ////////////////////////////////////
-        ////////////////////////////////////
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                updateUI();
 
-//        handler = new Handler();
-//        runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                updateUI();
-//                handler.postDelayed(this, 5 * 1000);
-//            }
-//        }; handler.post(runnable);
-
-        ////////////////////////////////////
-        ////////////////////////////////////
-        ////////////////////////////////////
+                handler.postDelayed(this, 15 * 1000);
+            }
+        }; handler.post(runnable);
 
         alarmHelper = new AlarmHelper();
         alarmHelper.setAlarmInNextMinute(getApplicationContext());
@@ -140,16 +137,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI() {
         usageLimit = sharedPreferences.getLong("usageLimit", 0);
-
-//        long endTime = System.currentTimeMillis();
-//        long startTime = endTime - ((long) LocalTime.now().getHour() * 60 * 60 * 1000 + (long) LocalTime.now().getMinute() * 60 * 1000);
+        isButtonClicked = UsagePermission.isUsageAccessGranted(this);
 
         AsyncTask.execute(() -> {
-            List<Stat> stats = new ArrayList<>();
+            stats.clear();
+//            stats.addAll(statsViewModel.getAllStats());
 
-//            statsViewModel.deleteAllStats();
-//            statsViewModel.addStatsFromSystemDaily(startTime, endTime);
-            stats.addAll(statsViewModel.getAllStats());
+            endTime = System.currentTimeMillis(); long interval = (long) LocalTime.now().getHour() * 60 * 60 * 1000 + (long) LocalTime.now().getMinute() * 60 * 1000;
+            startTime = endTime - interval;
+            getStatsDailyFromSystem(startTime, endTime, isButtonClicked);
 
             List<App> selectedApps = new ArrayList<>();
             selectedApps.addAll(appsViewModel.getAllApps());
@@ -169,20 +165,39 @@ public class MainActivity extends AppCompatActivity {
         Log.i("Limits Of MAIN ACTIVITY", "UsageLimit: --> " + usageLimit);
         Log.i("Limits Of MAIN ACTIVITY", "Usage: --> " + usage);
     }
+    public void getStatsDailyFromSystem(long startTime, long endTime, boolean isNextClicked) {
+        if (isNextClicked) {
 
+            UsageStatsManager usageStatsManager = (UsageStatsManager) getApplication().getSystemService(Context.USAGE_STATS_SERVICE);
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
 
+            stats.clear();
+            for (int i = 0; i < usageStatsList.size(); i++) {
+                UsageStats usageStats = usageStatsList.get(i);
+
+                if (usageStats.getTotalTimeInForeground() / 60000 > 0 && usageStats.getLastTimeUsed() >= startTime) {
+                    stats.add(new Stat(usageStats.getPackageName(), usageStats.getTotalTimeInForeground()));
+                }
+            }
+            for (int i = 0; i < stats.size(); i++) {
+                Log.i("STATS JUST ADDED", stats.get(i).toString());
+            }
+        }
+        Log.i("STATS JUST ADDED","");
+        Log.i("STATS JUST ADDED","");
+        Log.i("STATS JUST ADDED","");
+        Log.i("STATS JUST ADDED","");
+    }
     private void startTracking() {
         Intent stopwatchService = new Intent(this, TrackingService.class);
         stopwatchService.putExtra(TrackingService.STOPWATCH_ACTION, TrackingService.START);
         this.startService(stopwatchService);
     }
-
     private void moveToForeground() {
         Intent stopwatchService = new Intent(this, TrackingService.class);
         stopwatchService.putExtra(TrackingService.STOPWATCH_ACTION, TrackingService.MOVE_TO_FOREGROUND);
         this.startService(stopwatchService);
     }
-
     private void moveToBackground() {
         Intent stopwatchService = new Intent(this, TrackingService.class);
         stopwatchService.putExtra(TrackingService.STOPWATCH_ACTION, TrackingService.MOVE_TO_BACKGROUND);
