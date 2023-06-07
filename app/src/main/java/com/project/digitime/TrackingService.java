@@ -11,11 +11,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.project.digitime.ui.limits.LimitFragment;
 import com.project.digitime.ui.stats.UsageConverter;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +39,7 @@ public class TrackingService extends Service {
     @NotNull
     public static final String STOPWATCH_ACTION = "STOPWATCH_ACTION";
 
-
+    public static boolean isNotificationSent = false;
     public static boolean isUsageLimitReached = false;
     String contentText = "";
     String title = "Tracking usage";
@@ -84,10 +86,12 @@ public class TrackingService extends Service {
                 if (isRunning) {
                     isUsageLimitReached = false;
                     handler.postDelayed(this, 100);
-                } else if (!MainActivity.isNotificationSent){
+                } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        sentNotification();
-                        MainActivity.isNotificationSent = true;
+                        if (!isNotificationSent){
+                            sentNotification();
+                        }
+                        isNotificationSent = true;
                     }
                     isUsageLimitReached = true;
                     handler.removeCallbacks(runnable);
@@ -141,7 +145,7 @@ public class TrackingService extends Service {
         double usagePercent = (double) MainActivity.usageMilli / (double) MainActivity.usageLimitMilli * 100;
 
         if (usagePercent <= 100){
-            title = "Tracking usage";
+            title = "Collecting usage";
             contentText = "Used " + UsageConverter.decimalFormat.format(usagePercent) + "% of daily usage limit" ;
         } else {
             title = "Usage limit Reached !";

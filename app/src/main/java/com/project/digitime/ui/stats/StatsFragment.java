@@ -38,7 +38,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.project.digitime.MainActivity;
 import com.project.digitime.R;
+import com.project.digitime.TrackingService;
 import com.project.digitime.adapter.SelectedAppAdapter;
 import com.project.digitime.database.App;
 import com.project.digitime.database.Stat;
@@ -160,15 +162,12 @@ public class StatsFragment extends Fragment{
         });
 
         Button btnTest = root.findViewById(R.id.btn_selected_apps_usage);
-        btnTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SelectedStatsFragment fragment = new SelectedStatsFragment();
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_main, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
+        btnTest.setOnClickListener(v -> {
+            SelectedStatsFragment fragment = new SelectedStatsFragment();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_main, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         });
 
 

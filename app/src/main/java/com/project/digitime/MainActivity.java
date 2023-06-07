@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
     public static long usageLimitMilli = 0;
     public static long usageMilli = 0;
 
-    public static boolean isNotificationSent = false;
     boolean isLimitReached = false;
     boolean isButtonClicked = false;
 

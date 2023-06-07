@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.project.digitime.MainActivity;
 import com.project.digitime.R;
 import com.project.digitime.mvvm.AppsViewModel;
 import com.project.digitime.ui.apps.AppsFragment;

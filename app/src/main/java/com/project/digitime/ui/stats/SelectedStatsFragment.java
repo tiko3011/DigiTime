@@ -33,6 +33,7 @@ import com.project.digitime.mvvm.StatsViewModel;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SelectedStatsFragment extends Fragment {
@@ -70,20 +71,20 @@ public class SelectedStatsFragment extends Fragment {
         statAdapter = new SelectedStatsFragment.StatAdapter();
         recyclerView.setAdapter(statAdapter);
 
-        AsyncTask.execute(() -> {
-            List<App> selectedApps = new ArrayList<>();
-            selectedApps.addAll(appsViewModel.getAllApps());
-
-            stats.addAll(statsViewModel.getAllStats());
-            int usageSelected = 0;
-            for (int i = 0; i < selectedApps.size(); i++) {
-                for (int j = 0; j < stats.size(); j++) {
-                    if (selectedApps.get(i).appName.equals(stats.get(j).statName)){
-                        usageSelected += stats.get(j).statTime;
-                    }
-                }
-            }
-        });
+//        AsyncTask.execute(() -> {
+//            List<App> selectedApps = new ArrayList<>();
+//            selectedApps.addAll(appsViewModel.getAllApps());
+//
+//            stats.addAll(statsViewModel.getAllStats());
+//            int usageSelected = 0;
+//            for (int i = 0; i < selectedApps.size(); i++) {
+//                for (int j = 0; j < stats.size(); j++) {
+//                    if (selectedApps.get(i).appName.equals(stats.get(j).statName)){
+//                        usageSelected += stats.get(j).statTime;
+//                    }
+//                }
+//            }
+//        });
 
         AsyncTask.execute(() -> {
             List<Stat> stats = new ArrayList<>();
@@ -106,7 +107,8 @@ public class SelectedStatsFragment extends Fragment {
                     }
                 }
             }
-            statAdapter.setStatsList(selectedStats  );
+            Collections.sort(selectedApps);
+            statAdapter.setStatsList(selectedStats);
 
             requireActivity().runOnUiThread(() -> {
                 tvUsageSelectedApps.setText(UsageConverter.convertMilliToString(this.usageSelected));

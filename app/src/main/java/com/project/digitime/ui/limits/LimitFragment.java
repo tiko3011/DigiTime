@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.project.digitime.MainActivity;
 import com.project.digitime.R;
+import com.project.digitime.TrackingService;
 import com.project.digitime.adapter.SelectedAppAdapter;
 import com.project.digitime.database.App;
 import com.project.digitime.mvvm.AppsViewModel;
@@ -36,6 +37,7 @@ import java.util.List;
 public class LimitFragment extends Fragment {
     static int weeklyUsage;
     public static long usageLimit;
+    public static boolean isLimitCreated = false;
     AppsViewModel appsViewModel;
 
     private List<SelectedApp> selectedApps = new ArrayList<>();
@@ -45,7 +47,8 @@ public class LimitFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root =  inflater.inflate(R.layout.fragment_limit, container, false);
 
-        MainActivity.isNotificationSent = false;
+        isLimitCreated = true;
+        TrackingService.isNotificationSent = false;
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         weeklyUsage = sharedPreferences.getInt("averageWeeklyUsage", AppsFragment.weeklyUsage);
