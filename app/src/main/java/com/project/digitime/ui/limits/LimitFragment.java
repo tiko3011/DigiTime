@@ -45,6 +45,8 @@ public class LimitFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root =  inflater.inflate(R.layout.fragment_limit, container, false);
 
+        MainActivity.isNotificationSent = false;
+
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         weeklyUsage = sharedPreferences.getInt("averageWeeklyUsage", AppsFragment.weeklyUsage);
         usageLimit = sharedPreferences.getLong("usageLimit", 180);

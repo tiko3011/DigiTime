@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.project.digitime.MainActivity;
 import com.project.digitime.R;
 import com.project.digitime.database.App;
 import com.project.digitime.mvvm.AppsViewModel;
@@ -51,6 +52,8 @@ public class AppsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_apps, container, false);
+
+        MainActivity.isNotificationSent = false;
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

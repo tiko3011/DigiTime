@@ -84,9 +84,10 @@ public class TrackingService extends Service {
                 if (isRunning) {
                     isUsageLimitReached = false;
                     handler.postDelayed(this, 100);
-                } else {
+                } else if (!MainActivity.isNotificationSent){
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         sentNotification();
+                        MainActivity.isNotificationSent = true;
                     }
                     isUsageLimitReached = true;
                     handler.removeCallbacks(runnable);
@@ -155,7 +156,8 @@ public class TrackingService extends Service {
     public void sentNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, LIMIT_CHANNEL_ID);
 
-        builder.setSmallIcon(R.drawable.ic_notification)
+        builder.setSmallIcon(R.drawable.ic_error)
+                .setColor(Color.parseColor("#FF0000"))
                 .setContentTitle("Usage")
                 .setContentText("You reached today's usage limit")
                 .setAutoCancel(true)

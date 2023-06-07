@@ -23,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -158,6 +159,18 @@ public class StatsFragment extends Fragment{
             });
         });
 
+        Button btnTest = root.findViewById(R.id.btn_selected_apps_usage);
+        btnTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SelectedStatsFragment fragment = new SelectedStatsFragment();
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_main, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
 
         checkAllPermissions();
         return root;
@@ -178,7 +191,7 @@ public class StatsFragment extends Fragment{
                         intent.setData(Uri.parse("package:" + packageName));
                         startActivity(intent);
                     }
-                }, DELAY_MILLISECONDS * 2);
+                }, DELAY_MILLISECONDS);
 
             }
         }, DELAY_MILLISECONDS);
