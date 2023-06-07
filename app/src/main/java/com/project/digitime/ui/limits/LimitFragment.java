@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.project.digitime.MainActivity;
 import com.project.digitime.R;
 import com.project.digitime.adapter.SelectedAppAdapter;
-import com.project.digitime.alarm.AlarmReceiver;
 import com.project.digitime.database.App;
 import com.project.digitime.mvvm.AppsViewModel;
 import com.project.digitime.ui.stats.SelectedApp;
@@ -48,7 +47,7 @@ public class LimitFragment extends Fragment {
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         weeklyUsage = sharedPreferences.getInt("averageWeeklyUsage", AppsFragment.weeklyUsage);
-        usageLimit = sharedPreferences.getLong("usageLimit", 300);
+        usageLimit = sharedPreferences.getLong("usageLimit", 180);
 
         @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
 

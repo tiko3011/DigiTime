@@ -5,12 +5,14 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
@@ -19,12 +21,11 @@ import com.project.digitime.ui.stats.UsageConverter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class TrackingService extends Service {
     @NotNull
-    public static String CHANNEL_ID = "Stopwatch_Notifications_Java";
+    public static String FOREGROUND_CHANNEL_ID = "DIGITIME_FOREGROUND";
+    public static String LIMIT_CHANNEL_ID = "DIGITIME_LIMIT";
+
     @NotNull
     public static String START = "START";
     @NotNull
@@ -58,7 +59,7 @@ public class TrackingService extends Service {
         String action = intent.getStringExtra(STOPWATCH_ACTION);
         switch (action) {
             case "START":
-                this.startStopwatch();
+                this.startTracking();
                 break;
             case "MOVE_TO_BACKGROUND":
                 this.moveToBackground();
@@ -84,6 +85,9 @@ public class TrackingService extends Service {
                     isUsageLimitReached = false;
                     handler.postDelayed(this, 100);
                 } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        sentNotification();
+                    }
                     isUsageLimitReached = true;
                     handler.removeCallbacks(runnable);
                 }
@@ -96,13 +100,13 @@ public class TrackingService extends Service {
         this.stopForeground(true);
     }
 
-    private void startStopwatch() {
+    private void startTracking() {
         Intent stopwatchIntent = new Intent();
         stopwatchIntent.setAction(START);
     }
 
     private void createChannel() {
-        NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Tracking", NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel notificationChannel = new NotificationChannel(FOREGROUND_CHANNEL_ID, "Tracking", NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.setShowBadge(false);
 
         NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
@@ -117,7 +121,7 @@ public class TrackingService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
+        return new NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
                 .setContentTitle(title)
                 .setOngoing(true)
                 .setContentText(String.valueOf(contentText))
@@ -127,7 +131,8 @@ public class TrackingService extends Service {
                 .setOnlyAlertOnce(true)
                 .setProgress((int) MainActivity.usageLimit, (int) MainActivity.usage, false)
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(true).build();
+                .setAutoCancel(true)
+                .build();
     }
 
     private void updateNotification() {
@@ -144,6 +149,44 @@ public class TrackingService extends Service {
 
 
         notificationManager.notify(1, buildNotification());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public void sentNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, LIMIT_CHANNEL_ID);
+
+        builder.setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle("Usage")
+                .setContentText("You reached today's usage limit")
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .putExtra("data", "Some data");
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, intent, PendingIntent.FLAG_MUTABLE);
+
+        builder.setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        NotificationChannel notificationChannel =
+                notificationManager.getNotificationChannel(LIMIT_CHANNEL_ID);
+
+        if (notificationChannel == null) {
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+
+            notificationChannel = new NotificationChannel(LIMIT_CHANNEL_ID, "Description", importance);
+            notificationChannel.setShowBadge(false);
+            notificationChannel.setLightColor(Color.GREEN);
+            notificationChannel.enableVibration(true);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        notificationManager.notify(1016, builder.build());
     }
 }
 

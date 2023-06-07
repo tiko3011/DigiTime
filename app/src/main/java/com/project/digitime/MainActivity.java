@@ -24,8 +24,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.project.digitime.alarm.AlarmHelper;
-import com.project.digitime.alarm.AlarmReceiver;
 import com.project.digitime.database.App;
 import com.project.digitime.database.Stat;
 import com.project.digitime.databinding.ActivityMainBinding;
@@ -41,7 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private AlarmHelper alarmHelper;
     private ActivityMainBinding binding;
     AppsViewModel appsViewModel;
     StatsViewModel statsViewModel;
@@ -88,9 +85,6 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(this, 5 * 1000);
             }
         }; handler.post(runnable);
-
-        alarmHelper = new AlarmHelper();
-        alarmHelper.setAlarmInNextMinute(getApplicationContext());
     }
 
 
